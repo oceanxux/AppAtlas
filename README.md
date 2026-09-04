@@ -1,4 +1,4 @@
-# 🌍 AppPriceTracker-iOS · App Store 全球比价工具
+# 🌍 App Store 比价工具
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
@@ -68,6 +68,39 @@
 4. 关闭：直接关掉 cmd 黑窗口
 
 > 想要双击启动可以自建 `.command` / `.bat` 脚本（各 3 行，调用上面的命令即可），此类本地工具不入库。
+
+## 🐳 Docker 部署
+
+镜像由 GitHub Actions 自动构建并发布：`ghcr.io/oceanxux/appatlas:latest`（amd64 + arm64 双架构），服务器部署**无需克隆仓库**：
+
+```bash
+# 1. 只取 compose 文件
+mkdir app-price && cd app-price
+curl -O https://raw.githubusercontent.com/oceanxux/AppAtlas/main/docker-compose.yml
+
+# 2. 启动
+docker compose up -d
+
+# 3. 以后更新到最新版
+docker compose pull && docker compose up -d
+
+# 日志 / 停止
+docker compose logs -f
+docker compose down
+```
+
+- 访问 `http://服务器IP:8765`（端口在 compose 的 `ports` 里改）
+- 账号数据（users.json）与接口缓存（cache.json）持久化在 `./data` 目录，重建容器不丢失
+- 默认管理员 `admin / admin123`，**公网部署请立即在右上角「用户」面板改密码**
+- 若 Packages 未设为 Public，先在服务器执行 `docker login ghcr.io -u oceanxux`（密码用有 `read:packages` 权限的 PAT）
+
+本地构建（开发调试）：
+
+```bash
+git clone https://github.com/oceanxux/AppAtlas.git && cd AppAtlas
+# 编辑 docker-compose.yml：注释 image 行、取消 build: . 行注释
+docker compose up -d --build
+```
 
 ### 系统要求
 - **Python 3.7+**

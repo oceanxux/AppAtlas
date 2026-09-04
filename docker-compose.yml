@@ -1,9 +1,9 @@
 services:
   app-price:
-    # 方式一：本地构建
-    build: .
-    # 方式二：拉取 GitHub Actions 构建好的镜像（推到 GitHub 后启用，替换 <你的用户名>/<仓库名>）
-    # image: ghcr.io/<你的用户名>/<仓库名>:latest
+    # 拉取 GitHub Actions 自动构建的镜像（推荐）
+    image: ghcr.io/oceanxux/appatlas:latest
+    # 本地构建（开发调试用）：注释掉上面 image 行，取消下行注释
+    # build: .
     container_name: app-price
     restart: unless-stopped
     ports:
