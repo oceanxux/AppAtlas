@@ -226,7 +226,7 @@ curl "$BASE/api/users" -H "X-Auth-Token: $TOKEN"
 [MIT](LICENSE) © 2026 paradossio
 
 ## 🙏 致谢
-
+- [fork 大佬](https://github.com/paradossio/AppPriceTracker-iOS)
 - [Apple iTunes Search API](https://performance-partners.apple.com/search-api) — 应用搜索 + 价格数据源
 - [@fawazahmed0/currency-api](https://github.com/fawazahmed0/exchange-api) — 免费汇率 CDN
 - [BestLemoon/ApplePriceTracker](https://github.com/BestLemoon/ApplePriceTracker) — App Store IAP 解析思路启发
