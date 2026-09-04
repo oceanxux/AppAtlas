@@ -399,6 +399,15 @@
   .multi-app-picker .offers-grid{display:flex;flex-wrap:wrap;gap:6px}
 
   .detail-loading{text-align:center;padding:80px 0;color:var(--muted);font-size:13.5px}
+  #detailBody{padding-bottom:48px}
+  .narrow-page{padding-bottom:48px}
+
+  /* ===== 通知渠道卡片 ===== */
+  .ch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+  .ch-card .ch-head{margin-bottom:10px;font-size:14px}
+  .key-create.col{flex-direction:column;align-items:stretch}
+  .key-create.col input{min-width:0;width:100%}
+  .ch-actions{display:flex;gap:8px;margin-top:10px}
 
   /* ===== 详情页丰富化：截图 / 关于 / 信息 ===== */
   .shot-strip{display:flex;gap:10px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
@@ -841,15 +850,31 @@
 <div class="view" id="viewNotify">
   <div class="container narrow-page">
     <div class="page-head"><h2 data-i18n="notifyTitle"></h2></div>
-    <div class="panel-card">
-      <div class="section-title" style="margin-bottom:10px"><span data-i18n="tgConfig"></span></div>
-      <div class="key-create">
-        <input id="tgTokenInput" data-i18n-attr="placeholder" data-i18n="tgTokenPh">
-        <input id="tgChatInput" data-i18n-attr="placeholder" data-i18n="tgChatPh" style="max-width:130px">
-        <button class="btn sm" id="tgSaveBtn" data-i18n="save"></button>
-        <button class="btn sm" id="tgTestBtn" data-i18n="tgTest"></button>
+    <div class="ch-grid">
+      <div class="panel-card ch-card">
+        <div class="ch-head">✈️ <b>Telegram</b></div>
+        <div class="key-create col">
+          <input id="tgTokenInput" data-i18n-attr="placeholder" data-i18n="tgTokenPh">
+          <input id="tgChatInput" data-i18n-attr="placeholder" data-i18n="tgChatPh">
+        </div>
+        <div class="ch-actions">
+          <button class="btn sm" id="tgSaveBtn" data-i18n="save"></button>
+          <button class="btn sm" id="tgTestBtn" data-i18n="chTest"></button>
+        </div>
+        <div class="hint" data-i18n="tgHint"></div>
       </div>
-      <div class="hint" data-i18n="tgHint"></div>
+      <div class="panel-card ch-card">
+        <div class="ch-head">🐶 <b>Bark (iOS)</b></div>
+        <div class="key-create col">
+          <input id="barkKeyInput" data-i18n-attr="placeholder" data-i18n="barkKeyPh">
+          <input id="barkServerInput" data-i18n-attr="placeholder" data-i18n="barkServerPh">
+        </div>
+        <div class="ch-actions">
+          <button class="btn sm" id="barkSaveBtn" data-i18n="save"></button>
+          <button class="btn sm" id="barkTestBtn" data-i18n="chTest"></button>
+        </div>
+        <div class="hint" data-i18n="barkHint"></div>
+      </div>
     </div>
     <div class="section-title" style="margin-top:22px"><span data-i18n="eventsTitle"></span></div>
     <div id="notifyList"></div>
@@ -973,6 +998,9 @@ const I18N = {
     notifyTitle:"价格通知", tgConfig:"Telegram 推送",
     tgTokenPh:"Bot Token（@BotFather 创建）", tgChatPh:"Chat ID",
     tgTest:"发送测试", tgTestOk:"✅ 测试消息已发送", tgTestFail:"发送失败，请检查配置",
+    chTest:"测试", chTestOk:"✅ 测试推送已发送", chTestFail:"发送失败，请检查配置",
+    barkKeyPh:"Device Key（Bark App 内复制）", barkServerPh:"服务器地址（可选，默认官方）",
+    barkHint:"iOS 安装 Bark App 后，在 App 内复制 Key 粘贴到上面；自建服务器可改地址。",
     tgHint:"在 Telegram 找 @BotFather 创建机器人拿到 Token；把机器人拉进对话或群，用 @userinfobot 查 Chat ID。价格变动会自动推送到这里。",
     eventsTitle:"通知记录", noEvents:"暂无通知。给 App 配置监控后，价格变动会出现在这里",
     watchCfg:"监控", watchCfgTitle:"编辑监控", watchCfgDesc:"选择哪些变动会触发通知，也可限定到特定套餐或区域。",
@@ -1049,6 +1077,9 @@ const I18N = {
     notifyTitle:"Price Alerts", tgConfig:"Telegram Push",
     tgTokenPh:"Bot Token (create via @BotFather)", tgChatPh:"Chat ID",
     tgTest:"Send test", tgTestOk:"✅ Test message sent", tgTestFail:"Send failed, check config",
+    chTest:"Test", chTestOk:"✅ Test push sent", chTestFail:"Send failed, check config",
+    barkKeyPh:"Device Key (copy from Bark app)", barkServerPh:"Server (optional, default official)",
+    barkHint:"Install Bark on iOS and paste its Key above; change the server URL if self-hosting.",
     tgHint:"Create a bot with @BotFather to get a Token; add the bot to a chat and get your Chat ID from @userinfobot. Price changes will be pushed here automatically.",
     eventsTitle:"Notifications", noEvents:"No alerts yet. Configure monitoring on an app and price changes will show up here",
     watchCfg:"Watch", watchCfgTitle:"Edit monitoring", watchCfgDesc:"Choose which changes trigger alerts, optionally limited to specific plans or regions.",
@@ -1204,6 +1235,26 @@ function updateRetryBtn(rows){
   if (n) btn.textContent = t("retryFailed", {n});
 }
 const CUR_SYMBOL = { CNY:"¥", USD:"$", EUR:"€", JPY:"¥" };
+const CURRENCIES = [
+  ["USD","🇺🇸","美元"],["CNY","🇨🇳","人民币"],["EUR","🇪🇺","欧元"],["GBP","🇬🇧","英镑"],
+  ["JPY","🇯🇵","日元"],["KRW","🇰🇷","韩元"],["HKD","🇭🇰","港币"],["TWD","🇹🇼","新台币"],
+  ["SGD","🇸🇬","新加坡元"],["AUD","🇦🇺","澳元"],["CAD","🇨🇦","加元"],["CHF","🇨🇭","瑞郎"],
+  ["RUB","🇷🇺","卢布"],["TRY","🇹🇷","里拉"],["INR","🇮🇳","卢比"],["BRL","🇧🇷","雷亚尔"],
+  ["MXN","🇲🇽","比索"],["THB","🇹🇭","泰铢"],["VND","🇻🇳","越南盾"],["PHP","🇵🇭","比索"],
+  ["IDR","🇮🇩","印尼盾"],["MYR","🇲🇾","林吉特"],["AED","🇦🇪","迪拉姆"],["SAR","🇸🇦","里亚尔"],
+  ["ZAR","🇿🇦","兰特"],["PLN","🇵🇱","兹罗提"],["SEK","🇸🇪","克朗"],["NOK","🇳🇴","克朗"],
+  ["DKK","🇩🇰","克朗"],["UAH","🇺🇦","格里夫纳"],
+];
+function fillCurrencySelects(){
+  ["convertCurrency","familyConvert","multiConvert"].forEach(id=>{
+    const sel = $(id); if (!sel) return;
+    const cur = sel.value;
+    const keepFirst = id === "convertCurrency" && sel.options[0] ? sel.options[0].outerHTML : "";
+    sel.innerHTML = keepFirst + CURRENCIES.map(([code,flag,name])=>
+      `<option value="${code}">${flag} ${name} ${code}</option>`).join("");
+    sel.value = cur || (id === "convertCurrency" ? "" : "CNY");
+  });
+}
 
 /* ====================== 主题 ====================== */
 let theme = localStorage.getItem("aptTheme")
@@ -1574,7 +1625,7 @@ function renderDetailHeader(){
   const infoRows = [
     [t("lblVendor"), app.artistName],
     [t("lblCategory"), app.primaryGenreName],
-    [t("lblLang"), (app.languageCodesISO2A||[]).join(", ").toUpperCase()],
+    [t("lblLang"), (()=>{ const l = (app.languageCodesISO2A||[]).map(x=>x.toUpperCase()); return l.slice(0,8).join(", ") + (l.length>8 ? ` +${l.length-8}` : ""); })()],
     [t("lblAge"), app.contentAdvisoryRating || "4+"],
     [t("lblVer"), app.version || "-"],
     [t("lblSize"), app.fileSizeBytes ? (app.fileSizeBytes/1048576).toFixed(1)+" MB" : "-"],
@@ -2513,7 +2564,7 @@ async function openWatchModal(){
 function showApi(){
   if (!authUser){ openLogin(); showHome(); return; }
   showView("viewApi");
-  $("apiOrigin").textContent = location.origin;
+  $("apiOrigin").textContent = location.origin + "/api";
   $("apiDocs").textContent =
     "# 数据接口示例（全部支持 X-API-Key 头）\n\n" +
     `curl "${location.origin}/api/search?q=chatgpt&country=us" \\\n` +
@@ -2551,9 +2602,15 @@ async function reloadKeys(){
 function showNotify(){
   if (!authUser){ openLogin(); showHome(); return; }
   showView("viewNotify");
-  fetch("/api/tg", {headers:{"X-Auth-Token": state.token || ""}})
+  fetch("/api/channels", {headers:{"X-Auth-Token": state.token || ""}})
     .then(x=>x.json()).then(d=>{
-      if (d.ok){ $("tgTokenInput").value = d.tg?.bot_token || ""; $("tgChatInput").value = d.tg?.chat_id || ""; }
+      if (d.ok){
+        const ch = d.channels || {};
+        $("tgTokenInput").value = ch.tg?.bot_token || "";
+        $("tgChatInput").value = ch.tg?.chat_id || "";
+        $("barkKeyInput").value = ch.bark?.device_key || "";
+        $("barkServerInput").value = ch.bark?.server || "";
+      }
     }).catch(()=>{});
   fetch("/api/notifications", {headers:{"X-Auth-Token": state.token || ""}})
     .then(x=>x.json()).then(d=>{
@@ -2584,6 +2641,7 @@ function showNotify(){
 /* ====================== Wire up ====================== */
 applyI18N();
 applyTheme();
+fillCurrencySelects();
 updateAuthUI();
 
 $("brandHome").addEventListener("click", ()=>navigate("#/"));
@@ -2652,12 +2710,22 @@ $("createKeyBtn").addEventListener("click", async ()=>{
 /* 价格通知 */
 $("navNotifyBtn").addEventListener("click", gated(()=>navigate("#/notify")));
 $("tgSaveBtn").addEventListener("click", async ()=>{
-  const r = await postJSON("tg/save", {bot_token: $("tgTokenInput").value.trim(), chat_id: $("tgChatInput").value.trim()});
+  const r = await postJSON("channels/save", {type:"tg",
+    config:{bot_token: $("tgTokenInput").value.trim(), chat_id: $("tgChatInput").value.trim()}});
   toast(r.ok ? t("saved") : authErrText(r.error));
 });
 $("tgTestBtn").addEventListener("click", async ()=>{
-  const r = await postJSON("tg/test", {});
-  toast(r.ok ? t("tgTestOk") : t("tgTestFail"));
+  const r = await postJSON("channels/test", {type:"tg"});
+  toast(r.ok ? t("chTestOk") : t("chTestFail"));
+});
+$("barkSaveBtn").addEventListener("click", async ()=>{
+  const r = await postJSON("channels/save", {type:"bark",
+    config:{device_key: $("barkKeyInput").value.trim(), server: $("barkServerInput").value.trim()}});
+  toast(r.ok ? t("saved") : authErrText(r.error));
+});
+$("barkTestBtn").addEventListener("click", async ()=>{
+  const r = await postJSON("channels/test", {type:"bark"});
+  toast(r.ok ? t("chTestOk") : t("chTestFail"));
 });
 
 /* 登录 / 注册 / 用户管理 */

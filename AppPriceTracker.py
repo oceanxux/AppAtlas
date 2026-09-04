@@ -223,6 +223,60 @@ def tg_send(bot_token, chat_id, text):
         return False
 
 
+def http_post_json(url, payload):
+    if not url:
+        return False
+    try:
+        req = urllib.request.Request(
+            url, data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=8)
+        return True
+    except Exception as e:
+        print(f"⚠️ Webhook 推送失败: {e}")
+        return False
+
+
+def bark_send(cfg, title, body):
+    """Bark (iOS) 推送：POST {server}/push，server 默认官方 api.day.app。"""
+    key = (cfg or {}).get("device_key", "")
+    if not key:
+        return False
+    server = ((cfg or {}).get("server") or "https://api.day.app").rstrip("/")
+    try:
+        req = urllib.request.Request(
+            f"{server}/push",
+            data=json.dumps({"device_key": key, "title": title[:64],
+                             "body": body[:800], "group": "AppAtlas"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=8)
+        return True
+    except Exception as e:
+        print(f"⚠️ Bark 推送失败: {e}")
+        return False
+
+
+def push_events(rec, app_name, events):
+    """把事件推送到用户配置的所有渠道（TG / Discord / HTTP Webhook）。"""
+    ch = rec.get("channels") or {}
+    first = TYPE_LABEL.get(events[0]["type"], "")
+    html_lines = [f"<b>{first} {app_name}</b>"]
+    plain_lines = [f"{first} {app_name}"]
+    for e in events[:10]:
+        if e["type"] in ("drop", "raise"):
+            seg = f"• {e['offer']}({e['period']}) {e['region']}: {e['old']} → {e['new']} {e.get('currency','')}"
+        else:
+            seg = f"• {e['offer']} — {e.get('detail','')}"
+        html_lines.append(seg)
+        plain_lines.append(seg)
+    if ch.get("tg", {}).get("bot_token") and ch["tg"].get("chat_id"):
+        tg_send(ch["tg"]["bot_token"], ch["tg"]["chat_id"], "\n".join(html_lines))
+    if ch.get("bark", {}).get("device_key"):
+        bark_send(ch["bark"], f"{first} {app_name}", "\n".join(plain_lines[1:]) or "有新的价格变动")
+    if ch.get("http", {}).get("url"):
+        http_post_json(ch["http"]["url"], {"app": app_name, "events": events[:20]})
+
+
 def run_monitor_pass():
     users, meta = load_users()
     jobs = {}
@@ -252,16 +306,7 @@ def run_monitor_pass():
             lst[:0] = events
             del lst[100:]
             changed = True
-            tg = (users.get(uname) or {}).get("tg") or {}
-            if tg.get("bot_token") and tg.get("chat_id"):
-                lines = [f"<b>{TYPE_LABEL.get(events[0]['type'], '')} {app_name}</b>"]
-                for e in events[:10]:
-                    if e["type"] in ("drop", "raise"):
-                        lines.append(f"• {e['offer']}({e['period']}) {e['region']}: "
-                                     f"{e['old']} → <b>{e['new']}</b> {e['currency']}")
-                    else:
-                        lines.append(f"• {e['offer']} — {e['detail']}")
-                tg_send(tg["bot_token"], tg["chat_id"], "\n".join(lines))
+            push_events(users.get(uname) or {}, app_name, events)
         monitor[aid] = {"ts": time.time(), "offers": current}
         changed = True
         time.sleep(1)  # App 之间歇一下，配合全局节流
@@ -400,7 +445,9 @@ def load_users():
         rec.setdefault("role", "admin" if name == "admin" else "user")
         rec.setdefault("api_keys", [])
         rec.setdefault("watches", [])
-        rec.setdefault("tg", {})
+        rec.setdefault("channels", {})
+        if rec.get("tg"):  # 旧版单 TG 配置迁移到 channels
+            rec["channels"].setdefault("tg", rec.pop("tg"))
     return users, meta
 
 
@@ -588,7 +635,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send({"ok": False})
 
             # ---------- 0.2 登录用户的密钥 / 监控 / 通知 / TG ----------
-            if path in ("/api/keys", "/api/watch", "/api/notifications", "/api/tg"):
+            if path in ("/api/keys", "/api/watch", "/api/notifications", "/api/channels"):
                 info = get_session(self.headers)
                 if not info:
                     return self._send({"ok": False, "error": "unauthorized"}, status=401)
@@ -602,7 +649,7 @@ class Handler(BaseHTTPRequestHandler):
                     notifs = _load_json_file(NOTIF_FILE, {})
                     return self._send({"ok": True,
                                        "events": notifs.get(info["username"], [])[:100]})
-                return self._send({"ok": True, "tg": rec.get("tg", {})})
+                return self._send({"ok": True, "channels": rec.get("channels", {})})
 
             # ---------- 1. 搜索应用 ----------
             if path == "/api/users":
@@ -924,7 +971,7 @@ class Handler(BaseHTTPRequestHandler):
 
         # ---- 登录用户的写操作：密钥 / 监控 / TG ----
         if path in ("/api/keys/create", "/api/keys/delete", "/api/watch/save",
-                    "/api/watch/delete", "/api/tg/save", "/api/tg/test"):
+                    "/api/watch/delete", "/api/channels/save", "/api/channels/test"):
             info = get_session(self.headers)
             if not info:
                 return self._send({"ok": False, "error": "unauthorized"}, status=401)
@@ -981,16 +1028,44 @@ class Handler(BaseHTTPRequestHandler):
                     save_users(users, meta)
                     return self._send({"ok": True})
 
-                if path == "/api/tg/save":
-                    rec["tg"] = {"bot_token": str(body.get("bot_token", ""))[:64],
-                                 "chat_id": str(body.get("chat_id", ""))[:32]}
+                if path == "/api/channels/save":
+                    ctype = str(body.get("type", ""))
+                    cfg = dict(body.get("config") or {})
+                    if ctype == "tg":
+                        cfg = {"bot_token": str(cfg.get("bot_token", ""))[:64],
+                               "chat_id": str(cfg.get("chat_id", ""))[:32]}
+                    elif ctype == "bark":
+                        device_key = str(cfg.get("device_key", ""))[:80]
+                        server = str(cfg.get("server", ""))[:200]
+                        if server and not server.startswith("http"):
+                            return self._send({"ok": False, "error": "bad_server_url"}, status=400)
+                        if not device_key:
+                            return self._send({"ok": False, "error": "missing device_key"}, status=400)
+                        cfg = {"device_key": device_key, "server": server}
+                    elif ctype == "http":
+                        url = str(cfg.get("url", ""))[:300]
+                        if url and not url.startswith("http"):
+                            return self._send({"ok": False, "error": "bad_webhook_url"}, status=400)
+                        cfg = {"url": url}
+                    else:
+                        return self._send({"ok": False, "error": "bad_channel"}, status=400)
+                    rec.setdefault("channels", {})[ctype] = cfg
                     save_users(users, meta)
                     return self._send({"ok": True})
 
-                if path == "/api/tg/test":
-                    tg = rec.get("tg") or {}
-                    ok = tg_send(tg.get("bot_token", ""), tg.get("chat_id", ""),
-                                 "✅ App Atlas 测试消息：Telegram 推送配置成功")
+                if path == "/api/channels/test":
+                    ctype = str(body.get("type", ""))
+                    cfg = (rec.get("channels") or {}).get(ctype) or {}
+                    text = f"✅ App Atlas 测试消息：{TYPE_LABEL.get(ctype, ctype)} 渠道配置成功"
+                    if ctype == "tg":
+                        ok = tg_send(cfg.get("bot_token", ""), cfg.get("chat_id", ""), text)
+                    elif ctype == "bark":
+                        ok = bark_send(cfg, "✅ App Atlas", text)
+                    elif ctype == "http":
+                        ok = http_post_json(cfg.get("url", ""),
+                                            {"app": "App Atlas", "events": [{"type": "test", "text": text}]})
+                    else:
+                        ok = False
                     return self._send({"ok": ok})
 
         return self._send({"error": "not found"}, 404)
