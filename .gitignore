@@ -13,3 +13,7 @@ __pycache__/
 *.pyc
 nohup.out
 *.log
+
+# 本地双击启动器（不上传，仅本地使用）
+启动 (macOS).command
+启动 (Windows).bat

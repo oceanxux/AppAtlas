@@ -9,7 +9,7 @@
 
 **实测可拿到 ChatGPT Plus / Pro / Spotify / Notion / Bumble 等任意 App 的全球订阅价格。**
 
-> 双击启动器 → 浏览器自动打开 → 搜索 App → 一键看 175 个国家的订阅价格对比
+> 运行 Python 脚本或 Docker 部署 → 浏览器自动打开 → 搜索 App → 一键看 175 个国家的订阅价格对比
 
 ## 🆕 V2.2 (2026-09)
 
@@ -43,26 +43,31 @@
 | 文件 | 说明 |
 |---|---|
 | `AppPriceTracker.py` | 后端（Python 标准库，零依赖）|
-| `AppPriceTracker.html` | 前端（中文 UI、175 国、暗色模式自适应）|
-| `启动 (macOS).command` | macOS 双击启动 |
-| `启动 (Windows).bat` | Windows 双击启动 |
+| `AppPriceTracker.html` | 前端（单文件 HTML+JS，深色模式自适应）|
+| `Dockerfile` / `docker-compose.yml` | Docker 部署 |
+| `.github/workflows/docker.yml` | GitHub Actions 自动构建镜像（amd64 + arm64）|
 
 ## 🚀 使用方法
 
 ### macOS
 1. 下载本仓库 ZIP（绿色 `Code` 按钮 → `Download ZIP`），解压
-2. 进入 `AppPriceTracker-iOS-main/` 文件夹
-3. 双击 **`启动 (macOS).command`**
-   - 首次双击如果系统提示"无法打开"，右键 → 打开 → 确认即可
-4. 浏览器自动打开 `http://localhost:8765`
-5. 关闭：在终端窗口按 **Ctrl+C**
+2. 进入文件夹，终端运行：
+   ```bash
+   python3 AppPriceTracker.py
+   ```
+3. 浏览器自动打开 `http://localhost:8765`
+4. 关闭：在终端窗口按 **Ctrl+C**
 
 ### Windows
 1. 下载并解压本仓库 ZIP
-2. 进入 `AppPriceTracker-iOS-main\` 文件夹
-3. 双击 **`启动 (Windows).bat`**
-4. 浏览器自动打开
-5. 关闭：直接关掉 cmd 黑窗口
+2. 在文件夹里打开 cmd，运行：
+   ```bat
+   python AppPriceTracker.py
+   ```
+3. 浏览器自动打开
+4. 关闭：直接关掉 cmd 黑窗口
+
+> 想要双击启动可以自建 `.command` / `.bat` 脚本（各 3 行，调用上面的命令即可），此类本地工具不入库。
 
 ### 系统要求
 - **Python 3.7+**
