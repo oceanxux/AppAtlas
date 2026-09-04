@@ -1,0 +1,10 @@
+.git
+.github
+_ui
+users.json
+cache.json
+.DS_Store
+__pycache__
+*.pyc
+*.md
+*.log
