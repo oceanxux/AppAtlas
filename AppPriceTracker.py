@@ -63,6 +63,240 @@ TOP_SUBSCRIPTION_APPS = [
     "932747118",   # Shadowrocket
 ]
 
+# ---------------- 内购数据拉取（Handler 与监控线程共用） ----------------
+def fetch_iap_data(aid, cc):
+    """内购/订阅数据：per-key 锁防击穿，成功缓存 6 小时。网络错误返回 None。"""
+    key = f"iap:{aid}:{cc}"
+
+    def _fetch():
+        apple_throttle()
+        u = (f"https://apps.apple.com/api/apps/v1/catalog/{cc}/apps/{aid}"
+             f"?platform=web&views=top-in-app-purchasables&l=en-us")
+        headers = {
+            "Authorization": "Bearer",
+            "Referer": f"https://apps.apple.com/{cc}/app/id{aid}",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept": "application/json",
+        }
+        try:
+            raw = http_get_json(u, headers=headers, timeout=15)
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                return {"country": cc, "ok": False, "reason": "not_listed"}
+            return None
+        except Exception:
+            return None
+        try:
+            app_data = raw["data"][0]
+            name = app_data["attributes"].get("name", "")
+            iaps_raw = (app_data.get("views", {}).get(
+                "top-in-app-purchasables", {}) or {}).get("data", [])
+            iaps = []
+            for x in iaps_raw:
+                a = x.get("attributes", {})
+                for o in (a.get("offers") or []):
+                    iaps.append({
+                        "iapId": x.get("id"),
+                        "name": a.get("name"),
+                        "offerName": a.get("offerName"),
+                        "isSubscription": a.get("isSubscription", False),
+                        "groupId": a.get("subscriptionFamilyId"),
+                        "groupName": a.get("subscriptionFamilyName"),
+                        "groupRank": a.get("subscriptionFamilyRank"),
+                        "currencyCode": o.get("currencyCode"),
+                        "price": o.get("price"),
+                        "priceFormatted": o.get("priceFormatted"),
+                        "period": o.get("recurringSubscriptionPeriod"),
+                    })
+            return {"country": cc, "ok": True, "appName": name, "iaps": iaps}
+        except Exception as e:
+            print(f"⚠️ iap parse: {e}")
+            return None
+
+    return cached_fetch(key, 6 * 3600, _fetch)
+
+# ---------------- 价格监控（定时任务 + 通知 + TG 推送） ----------------
+MONITOR_HOURS = float(os.environ.get("MONITOR_HOURS", "6"))
+MONITOR_FILE = DATA_DIR / "monitor.json"      # app_id → 最近一次报价快照
+NOTIF_FILE = DATA_DIR / "notifications.json"  # username → [事件]
+MON_LOCK = threading.Lock()
+DEFAULT_MONITOR_REGIONS = ["US", "CN", "HK", "TW", "JP", "KR", "SG", "MY", "TH",
+                           "VN", "PH", "ID", "IN", "PK", "TR", "AE", "SA", "GB",
+                           "DE", "FR", "IT", "ES", "RU", "BR", "MX", "AR", "CA",
+                           "AU", "NG", "ZA"]
+TYPE_LABEL = {"drop": "📉 降价", "raise": "📈 涨价",
+              "new": "🆕 新增套餐", "remove": "➖ 移除套餐"}
+
+
+def _load_json_file(path, default):
+    try:
+        if path.exists():
+            return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"⚠️ {path.name} 读取失败: {e}")
+    return default
+
+
+def _save_json_file(path, data):
+    try:
+        path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    except OSError as e:
+        print(f"⚠️ {path.name} 写入失败: {e}")
+
+
+def build_offers_map(aid, regions):
+    """当前报价快照: offerKey → {name, period, prices:{cc:price}, currency:{cc:cur}}"""
+    offers = {}
+    for cc in regions:
+        data = fetch_iap_data(str(aid), cc.lower())
+        if not data or not data.get("ok"):
+            continue
+        for i in data.get("iaps", []):
+            key = f"{i.get('iapId')}::{i.get('period') or 'ONCE'}"
+            o = offers.setdefault(key, {
+                "name": i.get("name") or i.get("offerName") or key,
+                "period": i.get("period") or "ONCE",
+                "prices": {}, "currency": {}})
+            o["prices"][cc.upper()] = i.get("price")
+            o["currency"][cc.upper()] = i.get("currencyCode")
+    return offers
+
+
+def diff_watch(prev, current, watch):
+    """对比上次快照，按 watch 的触发条件生成事件列表。首次只记基线不报事件。"""
+    triggers = set(watch.get("triggers") or ["drop", "raise", "new", "remove"])
+    offers_f = set(watch.get("offers") or [])
+    regions_f = set(watch.get("regions") or [])
+    events = []
+    now = int(time.time())
+
+    def ok_region(cc): return not regions_f or cc in regions_f
+    def ok_offer(key): return not offers_f or key in offers_f
+
+    if not prev:
+        return events
+    for key, cur in current.items():
+        if not ok_offer(key):
+            continue
+        old = prev.get(key)
+        if old is None:
+            if "new" in triggers:
+                events.append({"ts": now, "type": "new", "offer": cur["name"],
+                               "period": cur["period"], "detail": "新增套餐"})
+            continue
+        for cc, price in cur["prices"].items():
+            if price is None or not ok_region(cc):
+                continue
+            oldp = old["prices"].get(cc)
+            if oldp in (None, 0) or price in (None, 0) or price == oldp:
+                continue
+            ev = {"ts": now, "offer": cur["name"], "period": cur["period"],
+                  "region": cc, "old": oldp, "new": price,
+                  "currency": cur["currency"].get(cc, "")}
+            if price < oldp and "drop" in triggers:
+                events.append({**ev, "type": "drop"})
+            elif price > oldp and "raise" in triggers:
+                events.append({**ev, "type": "raise"})
+    if "remove" in triggers:
+        for key, old in prev.items():
+            if key not in current and ok_offer(key):
+                events.append({"ts": now, "type": "remove",
+                               "offer": old.get("name", key),
+                               "period": old.get("period", ""),
+                               "detail": "套餐已移除"})
+    return events
+
+
+def tg_send(bot_token, chat_id, text):
+    if not bot_token or not chat_id:
+        return False
+    try:
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            data=json.dumps({"chat_id": chat_id, "text": text,
+                             "parse_mode": "HTML"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=8)
+        return True
+    except Exception as e:
+        print(f"⚠️ TG 推送失败: {e}")
+        return False
+
+
+def run_monitor_pass():
+    users, meta = load_users()
+    jobs = {}
+    for uname, rec in users.items():
+        for w in rec.get("watches", []):
+            jobs.setdefault(str(w.get("app_id")), []).append((uname, w))
+    if not jobs:
+        return
+    monitor = _load_json_file(MONITOR_FILE, {})
+    notifs = _load_json_file(NOTIF_FILE, {})
+    changed = False
+    for aid, watchers in jobs.items():
+        regions = set()
+        for _, w in watchers:
+            regions.update(w.get("regions") or DEFAULT_MONITOR_REGIONS)
+        current = build_offers_map(aid, sorted(regions))
+        prev = (monitor.get(aid) or {}).get("offers")
+        app_name = watchers[0][1].get("name") or aid
+        for uname, w in watchers:
+            events = diff_watch(prev, current, w)
+            if not events:
+                continue
+            lst = notifs.setdefault(uname, [])
+            for ev in events:
+                ev.update({"app_id": aid, "app_name": app_name,
+                           "icon": w.get("icon", "")})
+            lst[:0] = events
+            del lst[100:]
+            changed = True
+            tg = (users.get(uname) or {}).get("tg") or {}
+            if tg.get("bot_token") and tg.get("chat_id"):
+                lines = [f"<b>{TYPE_LABEL.get(events[0]['type'], '')} {app_name}</b>"]
+                for e in events[:10]:
+                    if e["type"] in ("drop", "raise"):
+                        lines.append(f"• {e['offer']}({e['period']}) {e['region']}: "
+                                     f"{e['old']} → <b>{e['new']}</b> {e['currency']}")
+                    else:
+                        lines.append(f"• {e['offer']} — {e['detail']}")
+                tg_send(tg["bot_token"], tg["chat_id"], "\n".join(lines))
+        monitor[aid] = {"ts": time.time(), "offers": current}
+        changed = True
+        time.sleep(1)  # App 之间歇一下，配合全局节流
+    if changed:
+        _save_json_file(MONITOR_FILE, monitor)
+        _save_json_file(NOTIF_FILE, notifs)
+
+
+def monitor_loop():
+    time.sleep(45)
+    while True:
+        try:
+            run_monitor_pass()
+        except Exception as e:
+            print(f"⚠️ 监控任务异常: {e}")
+        time.sleep(MONITOR_HOURS * 3600)
+
+
+def get_apikey_user(headers):
+    """X-API-Key → username。命中则顺带更新 last_used（每小时最多写一次盘）。"""
+    key = headers.get("X-API-Key", "")
+    if not key:
+        return None
+    users, meta = load_users()
+    for uname, rec in users.items():
+        for k in rec.get("api_keys", []):
+            if k.get("key") == key:
+                now = int(time.time())
+                if now - (k.get("last_used") or 0) > 3600:
+                    with USER_LOCK:
+                        k["last_used"] = now
+                        save_users(users, meta)
+                return uname
+    return None
+
 # Apple API 结果缓存: key -> {"expires": ts, "data": obj}（内存 + 落盘，重启不丢）
 CACHE = {}
 CACHE_LOCK = threading.Lock()
@@ -164,6 +398,9 @@ def load_users():
     users = data.get("users") or {}
     for name, rec in users.items():
         rec.setdefault("role", "admin" if name == "admin" else "user")
+        rec.setdefault("api_keys", [])
+        rec.setdefault("watches", [])
+        rec.setdefault("tg", {})
     return users, meta
 
 
@@ -206,6 +443,44 @@ def get_session(headers):
 
 def count_admins(users):
     return sum(1 for r in users.values() if r.get("role") == "admin")
+
+# 细粒度 per-key 互斥锁：同一 key 的并发未命中只放一个线程回源，
+# 其余线程等锁后直接读缓存（防击穿/防重复请求）。
+_KEY_LOCKS = {}
+_KEY_LOCKS_GUARD = threading.Lock()
+
+
+class KeyLock:
+    def __init__(self, key):
+        with _KEY_LOCKS_GUARD:
+            lock = _KEY_LOCKS.get(key)
+            if lock is None:
+                lock = threading.Lock()
+                _KEY_LOCKS[key] = lock
+            self.lock = lock
+
+    def __enter__(self):
+        self.lock.acquire()
+
+    def __exit__(self, *exc):
+        self.lock.release()
+
+
+def cached_fetch(key, ttl, fetcher, ttl_fn=None):
+    """读缓存 → 未命中则拿 per-key 锁回源（双检）→ 写缓存。
+    fetcher 返回 None 表示上游失败，不缓存。ttl_fn(data) 可按结果定 TTL。"""
+    hit = cache_get(key)
+    if hit is not None:
+        return hit
+    with KeyLock(key):
+        hit = cache_get(key)  # 等锁期间可能已被其他线程写入
+        if hit is not None:
+            return hit
+        data = fetcher()
+        if data is not None:
+            cache_put(key, data, ttl_fn(data) if ttl_fn else ttl)
+        return data
+
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
       "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15")
@@ -306,9 +581,30 @@ class Handler(BaseHTTPRequestHandler):
                 if info:
                     return self._send({"ok": True, "username": info["username"],
                                        "role": info["role"]})
+                ak = get_apikey_user(self.headers)
+                if ak:
+                    return self._send({"ok": True, "username": ak,
+                                       "role": "api_key", "via": "api_key"})
                 return self._send({"ok": False})
 
-            # ---------- 0.1 用户列表 (仅管理员) ----------
+            # ---------- 0.2 登录用户的密钥 / 监控 / 通知 / TG ----------
+            if path in ("/api/keys", "/api/watch", "/api/notifications", "/api/tg"):
+                info = get_session(self.headers)
+                if not info:
+                    return self._send({"ok": False, "error": "unauthorized"}, status=401)
+                users, meta = load_users()
+                rec = users.get(info["username"]) or {}
+                if path == "/api/keys":
+                    return self._send({"ok": True, "keys": rec.get("api_keys", [])})
+                if path == "/api/watch":
+                    return self._send({"ok": True, "watches": rec.get("watches", [])})
+                if path == "/api/notifications":
+                    notifs = _load_json_file(NOTIF_FILE, {})
+                    return self._send({"ok": True,
+                                       "events": notifs.get(info["username"], [])[:100]})
+                return self._send({"ok": True, "tg": rec.get("tg", {})})
+
+            # ---------- 1. 搜索应用 ----------
             if path == "/api/users":
                 info = get_session(self.headers)
                 if not info:
@@ -338,7 +634,18 @@ class Handler(BaseHTTPRequestHandler):
                     u = (f"https://itunes.apple.com/search?"
                          f"term={urllib.parse.quote(term)}"
                          f"&country={cc}&entity=software&limit=20")
-                return self._send(http_get_json(u))
+                key = f"search:{cc}:{hashlib.md5(term.lower().encode()).hexdigest()}"
+
+                def _fetch_search():
+                    try:
+                        return http_get_json(u)
+                    except Exception:
+                        return None
+                data = cached_fetch(key, 86400, _fetch_search,
+                                    ttl_fn=lambda x: 86400 if x.get("resultCount") else 600)
+                if data is not None:
+                    return self._send(data)
+                return self._err("search upstream error", 502)
 
             # ---------- 2. 应用本身价格 (lookup, 缓存 30 分钟) ----------
             if path == "/api/lookup":
@@ -346,77 +653,31 @@ class Handler(BaseHTTPRequestHandler):
                 cc = qs.get("country", "us").lower()
                 if not aid:
                     return self._err("missing id", 400)
-                ck = f"lookup:{aid}:{cc}"
-                cached = cache_get(ck)
-                if cached is not None:
-                    return self._send(cached)
-                u = (f"https://itunes.apple.com/lookup?id={aid}"
-                     f"&country={cc}&entity=software")
-                d = http_get_json(u)
-                if d.get("resultCount"):
-                    cache_put(ck, d, 1800)
-                return self._send(d)
+                key = f"lookup:{aid}:{cc}"
 
-            # ---------- 3. 内购订阅价格 (核心, 成功缓存 1 小时) ----------
+                def _fetch_lookup():
+                    u = (f"https://itunes.apple.com/lookup?id={aid}"
+                         f"&country={cc}&entity=software")
+                    try:
+                        return http_get_json(u)
+                    except Exception:
+                        return None
+                d = cached_fetch(key, 86400, _fetch_lookup,
+                                 ttl_fn=lambda x: 86400 if x.get("resultCount") else 600)
+                if d is not None:
+                    return self._send(d)
+                return self._err("upstream error", 502)
+
+            # ---------- 3. 内购订阅价格 (核心, 成功缓存 6 小时) ----------
             if path == "/api/iap":
                 aid = qs.get("id")
                 cc = qs.get("country", "us").lower()
                 if not aid:
                     return self._err("missing id", 400)
-                ck = f"iap:{aid}:{cc}"
-                cached = cache_get(ck)
-                if cached is not None:
-                    return self._send(cached)
-                apple_throttle()
-                u = (f"https://apps.apple.com/api/apps/v1/catalog/{cc}/apps/{aid}"
-                     f"?platform=web&views=top-in-app-purchasables&l=en-us")
-                headers = {
-                    "Authorization": "Bearer",
-                    "Referer": f"https://apps.apple.com/{cc}/app/id{aid}",
-                    "Accept-Language": "en-US,en;q=0.9",
-                    "Accept": "application/json",
-                }
-                try:
-                    raw = http_get_json(u, headers=headers, timeout=15)
-                except urllib.error.HTTPError as e:
-                    if e.code == 404:
-                        # 未上架是稳定事实，缓存 10 分钟；reason 用代码，前端按语言翻译
-                        resp = {"country": cc, "ok": False, "reason": "not_listed"}
-                        cache_put(ck, resp, 600)
-                        return self._send(resp)
-                    return self._err(f"HTTP {e.code} from apps.apple.com", 502)
-
-                # 提炼成精简格式
-                try:
-                    app_data = raw["data"][0]
-                    name = app_data["attributes"].get("name", "")
-                    iap_view = app_data.get("views", {}).get(
-                        "top-in-app-purchasables", {})
-                    iaps_raw = iap_view.get("data", [])
-                    iaps = []
-                    for x in iaps_raw:
-                        a = x.get("attributes", {})
-                        for o in (a.get("offers") or []):
-                            iaps.append({
-                                "iapId": x.get("id"),
-                                "name": a.get("name"),
-                                "offerName": a.get("offerName"),
-                                "isSubscription": a.get("isSubscription", False),
-                                "groupId": a.get("subscriptionFamilyId"),
-                                "groupName": a.get("subscriptionFamilyName"),
-                                "groupRank": a.get("subscriptionFamilyRank"),
-                                "currencyCode": o.get("currencyCode"),
-                                "price": o.get("price"),
-                                "priceFormatted": o.get("priceFormatted"),
-                                "period": o.get("recurringSubscriptionPeriod"),
-                            })
-                    resp = {"country": cc, "ok": True,
-                            "appName": name, "iaps": iaps}
-                    cache_put(ck, resp, 6 * 3600)  # 价格变动很少，缓存 6 小时
-                    cache_flush()
-                    return self._send(resp)
-                except Exception as e:
-                    return self._err(f"parse: {e}", 500)
+                data = fetch_iap_data(aid, cc)
+                if data is not None:
+                    return self._send(data)
+                return self._err("HTTP error from apps.apple.com", 502)
 
             # ---------- 3.5 热门订阅 App（人工策划清单，元数据实时拉取，缓存 24h） ----------
             # Apple 官方没有"订阅榜"，主流比价站均为人工策划；
@@ -654,12 +915,83 @@ class Handler(BaseHTTPRequestHandler):
                     save_users(users, meta)
                 return self._send({"ok": True})
 
-            if path == "/api/config/set":
-                with USER_LOCK:
-                    users, meta = load_users()
-                    meta["allow_register"] = bool(body.get("allow_register"))
+                if path == "/api/config/set":
+                    with USER_LOCK:
+                        users, meta = load_users()
+                        meta["allow_register"] = bool(body.get("allow_register"))
+                        save_users(users, meta)
+                    return self._send({"ok": True, "allow_register": meta["allow_register"]})
+
+        # ---- 登录用户的写操作：密钥 / 监控 / TG ----
+        if path in ("/api/keys/create", "/api/keys/delete", "/api/watch/save",
+                    "/api/watch/delete", "/api/tg/save", "/api/tg/test"):
+            info = get_session(self.headers)
+            if not info:
+                return self._send({"ok": False, "error": "unauthorized"}, status=401)
+            with USER_LOCK:
+                users, meta = load_users()
+                rec = users.get(info["username"])
+                if not rec:
+                    return self._send({"ok": False, "error": "no_such_user"}, status=404)
+
+                if path == "/api/keys/create":
+                    name = str(body.get("name", "")).strip()[:32] or "key"
+                    kid = secrets.token_hex(4)
+                    key = "atlas_live_" + secrets.token_urlsafe(24)
+                    rec.setdefault("api_keys", []).append(
+                        {"id": kid, "name": name, "key": key,
+                         "created_at": int(time.time()), "last_used": 0})
                     save_users(users, meta)
-                return self._send({"ok": True, "allow_register": meta["allow_register"]})
+                    return self._send({"ok": True,
+                                       "key": {"id": kid, "name": name, "key": key}})
+
+                if path == "/api/keys/delete":
+                    kid = str(body.get("id", ""))
+                    rec["api_keys"] = [k for k in rec.get("api_keys", [])
+                                       if k.get("id") != kid]
+                    save_users(users, meta)
+                    return self._send({"ok": True})
+
+                if path == "/api/watch/save":
+                    aid = str(body.get("app_id", ""))
+                    if not aid.isdigit():
+                        return self._send({"ok": False, "error": "missing app_id"},
+                                          status=400)
+                    w = {"app_id": aid,
+                         "name": str(body.get("name", ""))[:80],
+                         "icon": str(body.get("icon", ""))[:300],
+                         "triggers": [t for t in (body.get("triggers") or [])
+                                      if t in ("drop", "raise", "new", "remove")],
+                         "offers": [str(x) for x in (body.get("offers") or [])][:60],
+                         "regions": [str(x).upper()[:2] for x in (body.get("regions") or [])][:60],
+                         "created_at": int(time.time())}
+                    if not w["triggers"]:
+                        w["triggers"] = ["drop", "raise", "new", "remove"]
+                    watches = [x for x in rec.setdefault("watches", [])
+                               if str(x.get("app_id")) != aid]
+                    watches.insert(0, w)
+                    rec["watches"] = watches[:30]
+                    save_users(users, meta)
+                    return self._send({"ok": True})
+
+                if path == "/api/watch/delete":
+                    aid = str(body.get("app_id", ""))
+                    rec["watches"] = [x for x in rec.get("watches", [])
+                                      if str(x.get("app_id")) != aid]
+                    save_users(users, meta)
+                    return self._send({"ok": True})
+
+                if path == "/api/tg/save":
+                    rec["tg"] = {"bot_token": str(body.get("bot_token", ""))[:64],
+                                 "chat_id": str(body.get("chat_id", ""))[:32]}
+                    save_users(users, meta)
+                    return self._send({"ok": True})
+
+                if path == "/api/tg/test":
+                    tg = rec.get("tg") or {}
+                    ok = tg_send(tg.get("bot_token", ""), tg.get("chat_id", ""),
+                                 "✅ App Atlas 测试消息：Telegram 推送配置成功")
+                    return self._send({"ok": ok})
 
         return self._send({"error": "not found"}, 404)
 
@@ -696,6 +1028,9 @@ def main():
     # 双击启动（有终端）时自动开浏览器；Docker/后台运行时不弹
     if sys.stdout.isatty() and os.environ.get("NO_BROWSER") != "1":
         threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+
+    # 价格监控定时任务（同时为监控中的 App 预热缓存）
+    threading.Thread(target=monitor_loop, daemon=True).start()
 
     try:
         server.serve_forever()

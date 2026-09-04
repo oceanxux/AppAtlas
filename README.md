@@ -18,7 +18,10 @@
 - 🔐 **账号系统**：支持注册 / 登录，默认只展示各国价格；登录后解锁监控列表、订阅家族大表、多 App 对比、历史走势与导出 CSV
   - 默认管理员 `admin / admin123`（首次启动自动创建 `users.json`，可用环境变量 `APT_ADMIN_PASSWORD` 覆盖）
   - 管理员在右上角「用户」面板：给别人授管理员、重置密码、删号、开关注册
-- 🌏 **区域覆盖增强**：后端全局请求节流 + 429 多级退避重试 + 查询结果落盘缓存（`cache.json`，6 小时 TTL），30 区查询不再出现"网络失败"，重复查询秒出
+- 🌏 **区域覆盖增强**：后端全局请求节流 + 429 多级退避重试 + 查询结果落盘缓存（`cache.json`），30 区查询不再出现"网络失败"，重复查询秒出
+- 🔔 **价格监控 + Telegram 推送**：详情页点「监控」配置通知时机（降价/涨价/新增/移除套餐）与限定套餐/区域，后端定时任务（`MONITOR_HOURS`，默认 6 小时）自动比对并推送
+- 🔑 **API 密钥**：登录后右上角「API」创建密钥，脚本带 `X-API-Key` 头即可调用全部数据接口
+- 📱 **详情页丰富化**：App 截图横滑、「关于此 App」全文展开、信息栅格（版本/大小/更新时间等）
 - 🌍 英文界面下地区名自动本地化（Intl.DisplayNames）
 - 🐛 修复：i18n 漏翻、复制功能与表格换算币种不一致、图表币种跟随换算选择等
 
@@ -197,6 +200,28 @@ docker compose up -d --build
 
 登录后调用受保护接口需带请求头：`X-Auth-Token: <token>`。token 有效期 7 天（服务重启后需重新登录）。
 
+**API 密钥方式**：登录后在网页右上角「API」创建密钥（形如 `atlas_live_...`），数据类接口（search / lookup / iap / top / fx / me）均可改用 `X-API-Key: <密钥>` 请求头，适合长期跑的脚本，不受会话过期影响。
+
+### 监控 / 通知 / Telegram（需登录）
+
+| 方法 | 路径 | Body (JSON) | 说明 |
+|---|---|---|---|
+| GET | `/api/watch` | - | 我的监控配置列表 |
+| POST | `/api/watch/save` | `{"app_id","name","icon","triggers","offers","regions"}` | 新建/更新监控。`triggers` 取 `drop/raise/new/remove`；`offers` 传套餐 key 数组、`regions` 传区码数组，空数组=监控全部 |
+| POST | `/api/watch/delete` | `{"app_id"}` | 取消监控 |
+| GET | `/api/notifications` | - | 最近 100 条价格变动事件 |
+| GET | `/api/tg` | - | 当前 Telegram 推送配置 |
+| POST | `/api/tg/save` | `{"bot_token","chat_id"}` | 保存 TG 推送配置 |
+| POST | `/api/tg/test` | - | 发送测试消息 |
+
+### 密钥管理（需登录）
+
+| 方法 | 路径 | Body (JSON) | 说明 |
+|---|---|---|---|
+| GET | `/api/keys` | - | 密钥列表（含 `last_used`）|
+| POST | `/api/keys/create` | `{"name"}` | 创建 API 密钥 |
+| POST | `/api/keys/delete` | `{"id"}` | 删除密钥 |
+
 ### 管理员接口（请求头需管理员的 token）
 
 | 方法 | 路径 | Body (JSON) | 说明 |
@@ -237,6 +262,7 @@ curl "$BASE/api/users" -H "X-Auth-Token: $TOKEN"
 | `HOST` | `127.0.0.1` | 监听地址（Docker 内为 `0.0.0.0`）|
 | `APT_ADMIN_PASSWORD` | 无 | 首次创建 users.json 时 admin 账号的密码 |
 | `NO_BROWSER` | 无 | 设为 `1` 不自动打开浏览器（后台运行时本就不会弹）|
+| `MONITOR_HOURS` | `6` | 价格监控定时任务的执行间隔（小时）|
 
 ## ⚠️ 注意事项
 

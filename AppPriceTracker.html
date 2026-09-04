@@ -400,6 +400,78 @@
 
   .detail-loading{text-align:center;padding:80px 0;color:var(--muted);font-size:13.5px}
 
+  /* ===== 详情页丰富化：截图 / 关于 / 信息 ===== */
+  .shot-strip{display:flex;gap:10px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
+  .shot-strip::-webkit-scrollbar{display:none}
+  .shot-strip img{height:300px;border-radius:14px;flex:0 0 auto;border:1px solid var(--hair2);
+    background:var(--panel2);box-shadow:var(--shadow-sm)}
+  .about-panel{background:var(--panel);border:1px solid var(--hair2);border-radius:16px;
+    padding:16px 18px;margin-top:16px}
+  .about-panel h4{margin:0 0 8px;font-size:14.5px}
+  .about-text{color:var(--muted2);font-size:13px;line-height:1.7;white-space:pre-line;
+    display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+  .about-text.expanded{display:block;-webkit-line-clamp:unset}
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:16px}
+  .info-item{background:var(--panel);border:1px solid var(--hair2);border-radius:12px;padding:10px 14px}
+  .info-item .ik{font-size:11px;color:var(--muted);font-weight:500}
+  .info-item .iv{font-size:13px;font-weight:600;margin-top:2px;word-break:break-all}
+
+  /* ===== 监控弹窗 ===== */
+  .form-label{font-size:12.5px;font-weight:600;color:var(--muted2);margin:14px 0 8px}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:6px}
+  .trig-row{display:flex;gap:8px;flex-wrap:wrap}
+  .trig-chip{padding:8px 14px;border-radius:var(--pill);border:1px solid var(--border);
+    background:var(--panel);color:var(--muted2);cursor:pointer;font-size:13px;font-weight:500;
+    display:inline-flex;align-items:center;gap:5px;transition:all .12s;font-family:inherit}
+  .trig-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .chk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px;
+    max-height:150px;overflow-y:auto;border:1px solid var(--hair2);border-radius:12px;padding:8px}
+  .chk-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text);
+    padding:5px 8px;border-radius:8px;cursor:pointer}
+  .chk-item:hover{background:var(--panel2)}
+  .chk-item input{accent-color:var(--accent);flex-shrink:0}
+  .chk-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* ===== API 接入 / 通知 页 ===== */
+  .narrow-page{max-width:860px}
+  .panel-card{background:var(--panel);border:1px solid var(--hair2);border-radius:16px;padding:16px 18px}
+  .api-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .api-k{font-size:12.5px;color:var(--muted);font-weight:500}
+  .api-url{flex:1;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--text);
+    background:var(--panel2);padding:7px 12px;border-radius:8px;word-break:break-all}
+  .key-create{display:flex;gap:8px;flex-wrap:wrap}
+  .key-create input{flex:1;min-width:150px;height:36px;padding:0 12px;border-radius:10px;
+    border:1px solid var(--border);background:var(--panel);color:var(--text);font-size:13px;
+    font-family:inherit;outline:none}
+  .key-create input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .key-table{width:100%;border-collapse:collapse;font-size:13px}
+  .key-table th{text-align:left;font-size:11.5px;color:var(--muted);padding:8px 10px;
+    border-bottom:1px solid var(--hair2)}
+  .key-table td{padding:9px 10px;border-bottom:1px solid var(--hair)}
+  .key-val{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);
+    cursor:pointer;background:var(--panel2);padding:3px 8px;border-radius:6px}
+  .api-docs{background:var(--panel2);border-radius:12px;padding:14px 16px;font-size:12px;
+    line-height:1.7;overflow-x:auto;font-family:ui-monospace,Menlo,monospace;color:var(--muted2);
+    white-space:pre-wrap;word-break:break-all;margin:0}
+  .evt{display:flex;gap:12px;align-items:flex-start;background:var(--panel);
+    border:1px solid var(--hair2);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+  .evt img{width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0}
+  .evt .body{flex:1;min-width:0}
+  .evt .line{font-size:13px}
+  .evt .time{font-size:11px;color:var(--muted);margin-top:2px}
+  .evt-badge{font-size:11px;font-weight:600;padding:2px 9px;border-radius:var(--pill);flex-shrink:0}
+  .evt-badge.drop{background:var(--green-bg);color:var(--green)}
+  .evt-badge.raise{background:rgba(229,72,77,.1);color:var(--high)}
+  .evt-badge.new{background:var(--accent-soft);color:var(--accent)}
+  .evt-badge.remove{background:var(--panel2);color:var(--muted)}
+
+  /* ===== 登录弹窗美化 ===== */
+  .login-mark{display:flex;justify-content:center;margin-bottom:10px}
+  .login-mark svg{width:44px;height:44px}
+  #loginModal .modal{text-align:center}
+  #loginModal .field{text-align:left}
+  #loginModal .modal-actions{justify-content:center}
+
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   @media (max-width:760px){
     .nav-inner{padding:0 16px}
@@ -435,6 +507,8 @@
         <button data-lang="en">EN</button>
       </div>
       <span class="user-chip" id="navUser" style="display:none"></span>
+      <button class="btn sm" id="navNotifyBtn" style="display:none" title="🔔">🔔</button>
+      <button class="btn sm" id="navApiBtn" style="display:none" data-i18n="apiNav"></button>
       <button class="btn sm" id="navAdminBtn" style="display:none" data-i18n="userMgmt"></button>
       <button class="btn sm" id="logoutBtn" style="display:none" data-i18n="logout"></button>
       <button class="btn sm primary" id="navLoginBtn" data-i18n="loginBtn"></button>
@@ -514,10 +588,10 @@
         </div>
         <div class="toolbar">
           <button class="btn" id="addWatchBtn" data-i18n="addWatch"></button>
+          <button class="btn" id="watchCfgBtn" data-i18n="watchCfg"></button>
           <button class="btn" id="familyBtn" data-i18n="familyTable"></button>
           <button class="btn" id="settingsBtn" data-i18n="settings"></button>
           <button class="btn" id="exportBtn" data-i18n="export"></button>
-          <button class="btn ghost" id="copyBtn" data-i18n="copy"></button>
         </div>
       </div>
 
@@ -577,6 +651,16 @@
         <div id="chartContent"></div>
         <div class="chart-legend" id="chartLegend"></div>
       </div>
+
+      <div class="shot-strip" id="shotStrip" style="display:none"></div>
+
+      <div class="about-panel" id="aboutPanel" style="display:none">
+        <h4 data-i18n="aboutApp"></h4>
+        <div class="about-text" id="aboutText"></div>
+        <button class="btn ghost sm" id="aboutExpand" style="display:none"></button>
+      </div>
+
+      <div class="info-grid" id="infoGrid" style="display:none"></div>
     </div>
     <div id="detailError" class="detail-loading" style="display:none"></div>
   </div>
@@ -588,11 +672,10 @@
   <button class="btn primary" id="openMultiCompareBtn" data-i18n="multiCompare"></button>
 </div>
 
-<div class="footer-note" id="footerNote" data-i18n="footerNote"></div>
-
 <!-- ===== 登录 / 注册弹窗 ===== -->
 <div class="modal-bg" id="loginModal">
   <div class="modal narrow">
+    <div class="login-mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="none" stroke="#4f46e5" stroke-linecap="round"><path d="M46.74 31.05A17 17 0 1 1 42.02 21.98" stroke-width="4.4"/><ellipse cx="30" cy="34" rx="7" ry="17" stroke-width="2.6" opacity=".35"/><path d="M13.5 34h33" stroke-width="2.6" opacity=".35"/></g><path d="M13 47 26 38 33 42 49.5 20" fill="none" stroke="#f59e0b" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="52" cy="16.5" r="4.4" fill="#f59e0b"/></svg></div>
     <h3 id="authTitle"></h3>
     <p class="desc" id="authDesc"></p>
     <label class="field"><span data-i18n="username"></span>
@@ -710,6 +793,69 @@
   </div>
 </div>
 
+<!-- ===== 编辑监控 ===== -->
+<div class="modal-bg" id="watchModal">
+  <div class="modal">
+    <h3 data-i18n="watchCfgTitle"></h3>
+    <p class="desc" data-i18n="watchCfgDesc"></p>
+    <div class="form-label" data-i18n="notifyOn"></div>
+    <div class="trig-row" id="trigRow">
+      <button class="trig-chip" data-trig="drop">📉 <span data-i18n="trigDrop"></span></button>
+      <button class="trig-chip" data-trig="raise">📈 <span data-i18n="trigRaise"></span></button>
+      <button class="trig-chip" data-trig="new">⊕ <span data-i18n="trigNew"></span></button>
+      <button class="trig-chip" data-trig="remove">⊖ <span data-i18n="trigRemove"></span></button>
+    </div>
+    <div class="form-label" data-i18n="limitOffers"></div>
+    <div class="chk-grid" id="watchOffers"></div>
+    <div class="hint" data-i18n="noLimitAll"></div>
+    <div class="form-label" data-i18n="limitRegions"></div>
+    <div class="chk-grid" id="watchRegions"></div>
+    <div class="hint" data-i18n="noLimitAll"></div>
+    <div class="modal-actions">
+      <button class="btn" id="watchDelete" data-i18n="delWatch" style="display:none"></button>
+      <button class="btn" id="watchCancel" data-i18n="cancel"></button>
+      <button class="btn primary" id="watchSave" data-i18n="save"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== API 接入 ===== -->
+<div class="view" id="viewApi">
+  <div class="container narrow-page">
+    <div class="page-head"><h2 data-i18n="apiTitle"></h2></div>
+    <div class="panel-card">
+      <div class="api-row"><span class="api-k" data-i18n="apiAddr"></span><code class="api-url" id="apiOrigin"></code></div>
+    </div>
+    <div class="section-title" style="margin-top:20px"><span data-i18n="apiKeyTitle"></span></div>
+    <div class="key-create">
+      <input id="keyNameInput" data-i18n-attr="placeholder" data-i18n="keyNamePh">
+      <button class="btn primary sm" id="createKeyBtn" data-i18n="createKey"></button>
+    </div>
+    <div id="keyTableWrap" style="margin-top:12px"></div>
+    <div class="section-title" style="margin-top:24px"><span data-i18n="apiDocs"></span></div>
+    <pre class="api-docs" id="apiDocs"></pre>
+  </div>
+</div>
+
+<!-- ===== 价格通知 ===== -->
+<div class="view" id="viewNotify">
+  <div class="container narrow-page">
+    <div class="page-head"><h2 data-i18n="notifyTitle"></h2></div>
+    <div class="panel-card">
+      <div class="section-title" style="margin-bottom:10px"><span data-i18n="tgConfig"></span></div>
+      <div class="key-create">
+        <input id="tgTokenInput" data-i18n-attr="placeholder" data-i18n="tgTokenPh">
+        <input id="tgChatInput" data-i18n-attr="placeholder" data-i18n="tgChatPh" style="max-width:130px">
+        <button class="btn sm" id="tgSaveBtn" data-i18n="save"></button>
+        <button class="btn sm" id="tgTestBtn" data-i18n="tgTest"></button>
+      </div>
+      <div class="hint" data-i18n="tgHint"></div>
+    </div>
+    <div class="section-title" style="margin-top:22px"><span data-i18n="eventsTitle"></span></div>
+    <div id="notifyList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <div class="chart-tooltip" id="chartTooltip"></div>
 
@@ -820,6 +966,22 @@ const I18N = {
     you:"你", retryFailed:"重试失败地区 ({n})", tableEmpty:"所选地区暂无可展示的价格",
     cachedUpdating:"已显示缓存价格，后台更新中…", cachedAt:"缓存价格 · {t} 更新",
     refreshPrices:"刷新价格",
+    apiNav:"API", apiTitle:"API 接入", apiAddr:"API 地址",
+    apiKeyTitle:"API 密钥", keyNamePh:"密钥名称（如 python 脚本）", createKey:"创建密钥",
+    keyName:"密钥名称", apiKeyLbl:"密钥", lastUsed:"最后使用", clickCopy:"点击复制",
+    noKeys:"还没有密钥，创建一个即可通过 API 调用本站数据", apiDocs:"调用示例",
+    notifyTitle:"价格通知", tgConfig:"Telegram 推送",
+    tgTokenPh:"Bot Token（@BotFather 创建）", tgChatPh:"Chat ID",
+    tgTest:"发送测试", tgTestOk:"✅ 测试消息已发送", tgTestFail:"发送失败，请检查配置",
+    tgHint:"在 Telegram 找 @BotFather 创建机器人拿到 Token；把机器人拉进对话或群，用 @userinfobot 查 Chat ID。价格变动会自动推送到这里。",
+    eventsTitle:"通知记录", noEvents:"暂无通知。给 App 配置监控后，价格变动会出现在这里",
+    watchCfg:"监控", watchCfgTitle:"编辑监控", watchCfgDesc:"选择哪些变动会触发通知，也可限定到特定套餐或区域。",
+    notifyOn:"通知时机", trigDrop:"降价", trigRaise:"涨价", trigNew:"新增套餐", trigRemove:"移除套餐",
+    limitOffers:"限定套餐", limitRegions:"限定区域", noLimitAll:"不选即监控全部",
+    delWatch:"取消监控", save:"保存", saved:"已保存 ✓", opDoneMsg:"操作成功 ✓",
+    aboutApp:"关于此 App", expand:"展开", collapse:"收起",
+    lblVendor:"供应商", lblCategory:"类别", lblLang:"语言", lblAge:"年龄分级",
+    lblVer:"版本", lblSize:"大小", lblUpdated:"最近更新", lblReleased:"发行时间",
     loginOk:"欢迎，{u}", loggedOut:"已退出登录",
     refreshing:"正在刷新 {n} 个…", refreshDone:"✓ 刷新完成", watchlistEmptyToast:"监控列表为空",
     themeToLight:"切换到浅色模式", themeToDark:"切换到深色模式",
@@ -880,6 +1042,22 @@ const I18N = {
     you:"you", retryFailed:"Retry failed ({n})", tableEmpty:"No prices to display for the selected regions",
     cachedUpdating:"Showing cached prices, updating in background…", cachedAt:"Cached prices · updated {t}",
     refreshPrices:"Refresh prices",
+    apiNav:"API", apiTitle:"API Access", apiAddr:"API base URL",
+    apiKeyTitle:"API Keys", keyNamePh:"Key name (e.g. python script)", createKey:"Create key",
+    keyName:"Name", apiKeyLbl:"Key", lastUsed:"Last used", clickCopy:"Click to copy",
+    noKeys:"No keys yet. Create one to call this site's data via API", apiDocs:"Usage examples",
+    notifyTitle:"Price Alerts", tgConfig:"Telegram Push",
+    tgTokenPh:"Bot Token (create via @BotFather)", tgChatPh:"Chat ID",
+    tgTest:"Send test", tgTestOk:"✅ Test message sent", tgTestFail:"Send failed, check config",
+    tgHint:"Create a bot with @BotFather to get a Token; add the bot to a chat and get your Chat ID from @userinfobot. Price changes will be pushed here automatically.",
+    eventsTitle:"Notifications", noEvents:"No alerts yet. Configure monitoring on an app and price changes will show up here",
+    watchCfg:"Watch", watchCfgTitle:"Edit monitoring", watchCfgDesc:"Choose which changes trigger alerts, optionally limited to specific plans or regions.",
+    notifyOn:"Notify on", trigDrop:"Drop", trigRaise:"Raise", trigNew:"New plan", trigRemove:"Removed",
+    limitOffers:"Limit to plans", limitRegions:"Limit to regions", noLimitAll:"Leave empty to watch all",
+    delWatch:"Stop watching", save:"Save", saved:"Saved ✓", opDoneMsg:"Done ✓",
+    aboutApp:"About this app", expand:"Expand", collapse:"Collapse",
+    lblVendor:"Seller", lblCategory:"Category", lblLang:"Languages", lblAge:"Age rating",
+    lblVer:"Version", lblSize:"Size", lblUpdated:"Last updated", lblReleased:"Released",
     loginOk:"Welcome, {u}", loggedOut:"Signed out",
     refreshing:"Refreshing {n}…", refreshDone:"✓ Refreshed", watchlistEmptyToast:"Watchlist is empty",
     themeToLight:"Switch to light mode", themeToDark:"Switch to dark mode",
@@ -1122,6 +1300,8 @@ function updateAuthUI(){
   $("navLoginBtn").style.display = authUser ? "none" : "";
   $("navUser").style.display = authUser ? "" : "none";
   $("logoutBtn").style.display = authUser ? "" : "none";
+  $("navNotifyBtn").style.display = authUser ? "" : "none";
+  $("navApiBtn").style.display = authUser ? "" : "none";
   $("navAdminBtn").style.display = (authUser && authUser.role === "admin") ? "" : "none";
   if (authUser) $("navUser").textContent = "👤 " + authUser.name;
   $("addWatchBtn").classList.toggle("gated-locked", !authUser);
@@ -1189,7 +1369,7 @@ async function reloadAdmin(){
 }
 
 /* ====================== 路由 ====================== */
-const VIEWS = ["viewHome","viewSearch","viewDetail"];
+const VIEWS = ["viewHome","viewSearch","viewDetail","viewApi","viewNotify"];
 function showView(id){
   VIEWS.forEach(v=>{
     const el = $(v);
@@ -1221,6 +1401,10 @@ async function route(){
   } else if (mSearch){
     const qs = new URLSearchParams(mSearch[1] || "");
     showSearch(qs.get("q") || "");
+  } else if (h === "#/api"){
+    showApi();
+  } else if (h === "#/notify"){
+    showNotify();
   } else {
     showHome();
   }
@@ -1372,6 +1556,34 @@ function renderDetailHeader(){
   if (app.trackId) badges.push("ID: " + app.trackId);
   $("appBadges").innerHTML = badges.map(b=>`<span class="badge">${esc(b)}</span>`).join("");
   $("appDesc").textContent = app.description || "";
+  // 截图条
+  const shots = app.screenshotUrls || [];
+  const strip = $("shotStrip");
+  strip.style.display = shots.length ? "flex" : "none";
+  strip.innerHTML = shots.slice(0,10).map(s=>`<img src="${esc(s)}" loading="lazy" alt="">`).join("");
+  // 关于此 App（全文 + 展开）
+  const about = $("aboutPanel");
+  about.style.display = app.description ? "block" : "none";
+  const aboutText = $("aboutText");
+  aboutText.textContent = app.description || "";
+  aboutText.classList.remove("expanded");
+  const expBtn = $("aboutExpand");
+  expBtn.style.display = (app.description||"").length > 150 ? "" : "none";
+  expBtn.textContent = t("expand");
+  // 信息栅格
+  const infoRows = [
+    [t("lblVendor"), app.artistName],
+    [t("lblCategory"), app.primaryGenreName],
+    [t("lblLang"), (app.languageCodesISO2A||[]).join(", ").toUpperCase()],
+    [t("lblAge"), app.contentAdvisoryRating || "4+"],
+    [t("lblVer"), app.version || "-"],
+    [t("lblSize"), app.fileSizeBytes ? (app.fileSizeBytes/1048576).toFixed(1)+" MB" : "-"],
+    [t("lblUpdated"), app.currentVersionReleaseDate ? new Date(app.currentVersionReleaseDate).toLocaleDateString(LANG==="en"?"en-US":"zh-CN") : "-"],
+    [t("lblReleased"), app.releaseDate ? new Date(app.releaseDate).toLocaleDateString(LANG==="en"?"en-US":"zh-CN") : "-"],
+  ].filter(x=>x[1]);
+  const grid = $("infoGrid");
+  grid.style.display = infoRows.length ? "grid" : "none";
+  grid.innerHTML = infoRows.map(([k,v])=>`<div class="info-item"><div class="ik">${esc(k)}</div><div class="iv">${esc(String(v))}</div></div>`).join("");
   // 监控按钮状态
   const watched = state.watchlist.find(x=>x.id===app.trackId);
   const btn = $("addWatchBtn");
@@ -2262,17 +2474,111 @@ function exportCSV(){
   URL.revokeObjectURL(a.href);
   toast(t("csvDone"));
 }
-function copyTable(){
-  if (!currentTableData.length) return;
-  const cur = convertTo || "CNY";
-  const header = [t("colCountry"), t("colRawPrice"), `${t("colConverted")} (${cur})`, t("colName")].join("\t");
-  const lines = [header];
-  currentTableData.filter(r=>r.ok).forEach(r=>{
-    const conv = convert(r.price, r.currency, cur, state.fxRates);
-    lines.push([nameOf(r.country), r.formattedPrice||"", conv!=null?conv.toFixed(2):"", r.trackName||""].join("\t"));
-  });
-  navigator.clipboard.writeText(lines.join("\n"));
-  toast(t("copyDone"));
+
+/* ====================== 监控配置 / API 密钥 / 通知 ====================== */
+function copyText(text){
+  const done = ()=>toast(t("copyDone"));
+  if (navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
+  } else fallbackCopy(text, done);
+}
+function fallbackCopy(text, done){
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); done(); } catch(e){}
+  ta.remove();
+}
+let watchTriggers = new Set(["drop","raise","new","remove"]);
+async function openWatchModal(){
+  if (!currentApp) return;
+  $("watchOffers").innerHTML = allOffers.map(o=>`
+    <label class="chk-item"><input type="checkbox" value="${esc(o.offerKey)}">
+      <span>${esc(o.name||o.offerName||"?")} · ${periodLabel(o.period)}</span></label>`).join("");
+  $("watchRegions").innerHTML = state.selectedCountries.map(cc=>`
+    <label class="chk-item"><input type="checkbox" value="${cc}">
+      <span>${flagOf(cc)} ${esc(nameOf(cc))}</span></label>`).join("");
+  const r = await fetch("/api/watch", {headers:{"X-Auth-Token": state.token || ""}})
+    .then(x=>x.json()).catch(()=>null);
+  const mine = r && r.ok ? (r.watches||[]).find(w=>String(w.app_id)===String(currentApp.trackId)) : null;
+  const cfg = mine || {triggers:["drop","raise","new","remove"], offers:[], regions:[]};
+  watchTriggers = new Set(cfg.triggers.length ? cfg.triggers : ["drop","raise","new","remove"]);
+  $("trigRow").querySelectorAll(".trig-chip").forEach(ch=>
+    ch.classList.toggle("active", watchTriggers.has(ch.dataset.trig)));
+  $("watchOffers").querySelectorAll("input").forEach(cb=>cb.checked = cfg.offers.includes(cb.value));
+  $("watchRegions").querySelectorAll("input").forEach(cb=>cb.checked = cfg.regions.includes(cb.value));
+  $("watchDelete").style.display = mine ? "" : "none";
+  $("watchModal").classList.add("show");
+}
+function showApi(){
+  if (!authUser){ openLogin(); showHome(); return; }
+  showView("viewApi");
+  $("apiOrigin").textContent = location.origin;
+  $("apiDocs").textContent =
+    "# 数据接口示例（全部支持 X-API-Key 头）\n\n" +
+    `curl "${location.origin}/api/search?q=chatgpt&country=us" \\\n` +
+    '  -H "X-API-Key: <你的密钥>"\n\n' +
+    `curl "${location.origin}/api/iap?id=6448311069&country=tr" \\\n` +
+    '  -H "X-API-Key: <你的密钥>"\n\n' +
+    `curl "${location.origin}/api/fx"\n\n` +
+    "# 返回字段与文档详见 README.md 的「API 接口」章节";
+  reloadKeys();
+}
+async function reloadKeys(){
+  const r = await fetch("/api/keys", {headers:{"X-Auth-Token": state.token || ""}})
+    .then(x=>x.json()).catch(()=>null);
+  const wrap = $("keyTableWrap");
+  if (!r || !r.ok){ wrap.innerHTML = `<div class="empty">${t("loadFail")}</div>`; return; }
+  const keys = r.keys || [];
+  if (!keys.length){ wrap.innerHTML = `<div class="empty">${t("noKeys")}</div>`; return; }
+  const locale = LANG === "en" ? "en-US" : "zh-CN";
+  wrap.innerHTML = `<table class="key-table"><thead><tr>
+      <th>${t("keyName")}</th><th>${t("apiKeyLbl")}</th><th>${t("lastUsed")}</th><th></th>
+    </tr></thead><tbody>` + keys.map(k=>`<tr>
+      <td>${esc(k.name)}</td>
+      <td><code class="key-val" data-key="${esc(k.key)}" title="${t("clickCopy")}">${esc(k.key.slice(0,15))}…</code></td>
+      <td>${k.last_used ? new Date(k.last_used*1000).toLocaleDateString(locale) : "—"}</td>
+      <td><button class="btn ghost sm key-del" data-id="${esc(k.id)}">✕</button></td>
+    </tr>`).join("") + `</tbody></table>`;
+  wrap.querySelectorAll(".key-val").forEach(el=>
+    el.addEventListener("click", ()=>copyText(el.dataset.key)));
+  wrap.querySelectorAll(".key-del").forEach(btn=>
+    btn.addEventListener("click", async ()=>{
+      const d = await postJSON("keys/delete", {id: btn.dataset.id});
+      if (d.ok){ toast(t("opDone")); reloadKeys(); } else toast(authErrText(d.error));
+    }));
+}
+function showNotify(){
+  if (!authUser){ openLogin(); showHome(); return; }
+  showView("viewNotify");
+  fetch("/api/tg", {headers:{"X-Auth-Token": state.token || ""}})
+    .then(x=>x.json()).then(d=>{
+      if (d.ok){ $("tgTokenInput").value = d.tg?.bot_token || ""; $("tgChatInput").value = d.tg?.chat_id || ""; }
+    }).catch(()=>{});
+  fetch("/api/notifications", {headers:{"X-Auth-Token": state.token || ""}})
+    .then(x=>x.json()).then(d=>{
+      const box = $("notifyList");
+      const events = (d && d.ok) ? (d.events || []) : [];
+      if (!events.length){ box.innerHTML = `<div class="empty">${t("noEvents")}</div>`; return; }
+      const locale = LANG === "en" ? "en-US" : "zh-CN";
+      const badgeOf = {drop: t("trigDrop"), raise: t("trigRaise"), new: t("trigNew"), remove: t("trigRemove")};
+      box.innerHTML = events.map(e=>{
+        let line;
+        if (e.type === "drop" || e.type === "raise"){
+          line = `${esc(e.offer)}（${periodLabel(e.period)}）· ${flagOf(e.region)} ${esc(nameOf(e.region))}：${e.old} → <b>${e.new}</b> ${esc(e.currency||"")}`;
+        } else {
+          line = `${esc(e.offer)} — ${e.detail || ""}`;
+        }
+        return `<div class="evt">
+          <img src="${esc(e.icon||"")}" alt="">
+          <div class="body">
+            <div class="line"><b>${esc(e.app_name)}</b> · ${line}</div>
+            <div class="time">${new Date(e.ts*1000).toLocaleString(locale)}</div>
+          </div>
+          <span class="evt-badge ${e.type}">${badgeOf[e.type] || e.type}</span>
+        </div>`;
+      }).join("");
+    }).catch(()=>{ $("notifyList").innerHTML = `<div class="empty">${t("loadFail")}</div>`; });
 }
 
 /* ====================== Wire up ====================== */
@@ -2296,9 +2602,63 @@ $("refreshAllBtn").addEventListener("click", refreshAll);
 $("familyBtn").addEventListener("click", gated(openFamilyTable));
 $("settingsBtn").addEventListener("click", openSettings);
 $("exportBtn").addEventListener("click", gated(exportCSV));
-$("copyBtn").addEventListener("click", copyTable);
 $("retryFailBtn").addEventListener("click", ()=>{ if (currentApp) runQuery(); });
 $("refreshPricesBtn").addEventListener("click", ()=>{ if (currentApp){ $("progressText").textContent = ""; runQuery(); } });
+
+/* 监控配置弹窗 */
+$("watchCfgBtn").addEventListener("click", gated(openWatchModal));
+$("watchCancel").addEventListener("click", ()=>$("watchModal").classList.remove("show"));
+$("watchModal").addEventListener("click", e=>{ if(e.target.id==="watchModal") e.target.classList.remove("show"); });
+$("trigRow").addEventListener("click", e=>{
+  const chip = e.target.closest(".trig-chip");
+  if (!chip) return;
+  chip.classList.toggle("active");
+  if (chip.classList.contains("active")) watchTriggers.add(chip.dataset.trig);
+  else watchTriggers.delete(chip.dataset.trig);
+});
+$("watchSave").addEventListener("click", async ()=>{
+  if (!currentApp) return;
+  const offers = [...$("watchOffers").querySelectorAll("input:checked")].map(cb=>cb.value);
+  const regions = [...$("watchRegions").querySelectorAll("input:checked")].map(cb=>cb.value);
+  const r = await postJSON("watch/save", {
+    app_id: String(currentApp.trackId), name: currentApp.trackName,
+    icon: currentApp.artworkUrl60 || "", triggers: [...watchTriggers],
+    offers, regions,
+  });
+  if (r.ok){ toast(t("saved")); $("watchModal").classList.remove("show"); }
+  else toast(authErrText(r.error));
+});
+$("watchDelete").addEventListener("click", async ()=>{
+  if (!currentApp) return;
+  const r = await postJSON("watch/delete", {app_id: String(currentApp.trackId)});
+  if (r.ok){ toast(t("opDone")); $("watchModal").classList.remove("show"); }
+});
+$("aboutExpand").addEventListener("click", ()=>{
+  const el = $("aboutText");
+  const expanded = el.classList.toggle("expanded");
+  $("aboutExpand").textContent = expanded ? t("collapse") : t("expand");
+});
+
+/* API 密钥 */
+$("navApiBtn").addEventListener("click", gated(()=>navigate("#/api")));
+$("createKeyBtn").addEventListener("click", async ()=>{
+  const name = $("keyNameInput").value.trim();
+  if (!name) return;
+  const r = await postJSON("keys/create", {name});
+  if (r.ok){ $("keyNameInput").value = ""; toast(t("opDone")); reloadKeys(); }
+  else toast(authErrText(r.error));
+});
+
+/* 价格通知 */
+$("navNotifyBtn").addEventListener("click", gated(()=>navigate("#/notify")));
+$("tgSaveBtn").addEventListener("click", async ()=>{
+  const r = await postJSON("tg/save", {bot_token: $("tgTokenInput").value.trim(), chat_id: $("tgChatInput").value.trim()});
+  toast(r.ok ? t("saved") : authErrText(r.error));
+});
+$("tgTestBtn").addEventListener("click", async ()=>{
+  const r = await postJSON("tg/test", {});
+  toast(r.ok ? t("tgTestOk") : t("tgTestFail"));
+});
 
 /* 登录 / 注册 / 用户管理 */
 $("navLoginBtn").addEventListener("click", ()=>openLogin("login"));
