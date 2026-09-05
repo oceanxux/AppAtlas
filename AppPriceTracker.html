@@ -316,6 +316,8 @@
   .modal-bg{position:fixed;inset:0;background:rgba(15,16,20,.45);display:none;
     align-items:center;justify-content:center;z-index:1000;padding:20px;
     backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  /* 账号/改密弹窗置于最上层,避免被后声明的弹窗遮挡 */
+  #accountModal,#pwdModal{z-index:1500}
   .modal-bg.show{display:flex}
   .modal{background:var(--panel);border:1px solid var(--hair2);border-radius:22px;padding:24px 26px;
     max-width:720px;width:100%;max-height:84vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.24);
@@ -3192,7 +3194,8 @@ window.addEventListener("hashchange", route);
   updateAuthUI();
   route();
   loadFx();
-  if (authUser && authUser.mustChange) openAccount(true);
+  // 记住的登录态不弹强制改密窗,不打扰浏览;仅提醒
+  if (authUser && authUser.mustChange) toast(t("mustChangePwd"), 3000);
 })();
 </script>
 </body>
