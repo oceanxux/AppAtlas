@@ -2,6 +2,7 @@ FROM python:3.12-alpine
 
 WORKDIR /app
 COPY AppPriceTracker.py AppPriceTracker.html ./
+COPY appatlas/ ./appatlas/
 
 # 仅内网/反代使用, 绑 0.0.0.0 供 Caddy 转发
 # (后端原生支持 HOST/PORT 环境变量, 后台运行时不会弹浏览器)

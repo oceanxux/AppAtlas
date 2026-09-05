@@ -6,6 +6,8 @@ _ui/
 # 账号数据（密码哈希）与接口缓存，首次启动自动生成
 users.json
 cache.json
+monitor.json
+notifications.json
 
 # 系统与临时文件
 .DS_Store
@@ -13,6 +15,7 @@ __pycache__/
 *.pyc
 nohup.out
 *.log
+.venv/
 
 # 本地双击启动器（不上传，仅本地使用）
 启动 (macOS).command

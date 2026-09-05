@@ -1,59 +1,36 @@
-# 🌍 App Store 比价工具
+# 🌍 App Atlas — App Store 全球比价工具
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey.svg)]()
-[![Version](https://img.shields.io/badge/version-2.1-blue.svg)]()
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)]()
 
-**中文 · [English](README_EN.md)**
+一键查看 **App Store 应用及内购订阅** 在全球 175 个国家的价格对比。实测可拿到 ChatGPT Plus / Pro、Spotify、Notion、Bumble 等任意 App 的实时订阅价格。
 
-**实测可拿到 ChatGPT Plus / Pro / Spotify / Notion / Bumble 等任意 App 的全球订阅价格。**
+> 运行脚本或 Docker 部署 → 浏览器自动打开 → 搜索 App → 看各国订阅价格对比、历史走势、多 App 横评，还能让 Telegram 机器人帮你查价、价格变动主动推送通知。
 
-> 运行 Python 脚本或 Docker 部署 → 浏览器自动打开 → 搜索 App → 一键看 175 个国家的订阅价格对比
+## ✨ 功能特性
 
-## 🆕 V2.2 (2026-09)
+- 💎 **内购 / 订阅跨国比价**：自动并发查询 30 国（可改为 175 国），按订阅套餐分类，显示原币价、折算 CNY/USD、与最低价的百分比差
+- 📱 **应用本身价格**：一次性买断价跨区对比（Minecraft、Procreate 等付费 App）
+- 📈 **历史价格折线图**：180 天快照，多国多线 + 悬停 tooltip
+- 📊 **家族大表**：一张表横向看同一 App 的多档订阅在所有国家/地区的价格
+- ⚖️ **多 App 横评**：监控列表多选，跨 App 跨国大表（ChatGPT vs YouTube vs Notion）
+- 🔔 **价格监控**：定时比对报价，降价/涨价/新增/移除套餐自动推送
+- 🤖 **Telegram 查价机器人**：发名称出搜索、发 ID 出各区最低价（见下方专节）
+- 🔑 **账号系统**：注册 / 登录 / 管理员，支持 API 密钥与接口鉴权门
+- 🌙 深色模式 + 中英双语 UI + CSV 导出 + 实时汇率
 
-- 🎨 **全新 UI**：首页 / 搜索页 / 详情页三页路由（浏览器前进后退可用），首页只有一个搜索框 + 热门 App 快捷入口
-- 🌙 **深色模式**：自动跟随系统 + 手动切换（右上角 🌙/☀️）
-- 🔐 **账号系统**：支持注册 / 登录，默认只展示各国价格；登录后解锁监控列表、订阅家族大表、多 App 对比、历史走势与导出 CSV
-  - 默认管理员 `admin / admin123`（首次启动自动创建 `users.json`，可用环境变量 `APT_ADMIN_PASSWORD` 覆盖）
-  - 管理员在右上角「用户」面板：给别人授管理员、重置密码、删号、开关注册
-- 🌏 **区域覆盖增强**：后端全局请求节流 + 429 多级退避重试 + 查询结果落盘缓存（`cache.json`），30 区查询不再出现"网络失败"，重复查询秒出
-- 🔔 **价格监控 + Telegram 推送**：详情页点「监控」配置通知时机（降价/涨价/新增/移除套餐）与限定套餐/区域，后端定时任务（`MONITOR_HOURS`，默认 6 小时）自动比对并推送
-- 🔑 **API 密钥**：登录后右上角「API」创建密钥，脚本带 `X-API-Key` 头即可调用全部数据接口
-- 📱 **详情页丰富化**：App 截图横滑、「关于此 App」全文展开、信息栅格（版本/大小/更新时间等）
-- 🌍 英文界面下地区名自动本地化（Intl.DisplayNames）
-- 🐛 修复：i18n 漏翻、复制功能与表格换算币种不一致、图表币种跟随换算选择等
+## 🚀 快速开始
 
-## 🆕 V2.1 新功能 (2026-06)
+### 前置要求
 
-- 📈 **历史价格折线图**（180 天周期，每次查询自动累积快照，多国多线 + 悬停 tooltip）
-- 📊 **家族大表**：一张表横向看 ChatGPT Plus/Pro/Go 在 30 国全部价格 (热力图色)
-- ⚖️ **多 App 横向对比**：监控列表多选 → 为每 App 选订阅 → 跨 App 跨国大表 (如 ChatGPT vs YouTube vs Notion)
-- 🌐 **中英双语 UI 切换**（保存到 localStorage）
-- 🎯 **SKU 名称校准**：跨国对齐主键改用 `iapId`（Apple salableAdamId 全球唯一），显示名优先英文区 canonical
-- 🔍 **SKU 模糊搜索**：YouTube 31 个内购也能秒筛（支持中英文、全文匹配，如 "plus" / "月付" / "premium"）
-
-## 📸 效果
-
-| 内购订阅跨国对比 | 关键指标 |
-|---|---|
-| ChatGPT Plus 月付：🇹🇷 土耳其 ₺499 ≈ ¥73 / 🇪🇸 西班牙 €22.99 ≈ ¥179 | 价差 **144%** |
-| ChatGPT Pro 20x 月付：🇹🇷 ₺7999 ≈ ¥1175 / 🇪🇸 €229 ≈ ¥1786 | 价差 **52%** |
-
-## 📦 文件清单
-
-| 文件 | 说明 |
-|---|---|
-| `AppPriceTracker.py` | 后端（Python 标准库，零依赖）|
-| `AppPriceTracker.html` | 前端（单文件 HTML+JS，深色模式自适应）|
-| `Dockerfile` / `docker-compose.yml` | Docker 部署 |
-| `.github/workflows/docker.yml` | GitHub Actions 自动构建镜像（amd64 + arm64）|
-
-## 🚀 使用方法
+- **Python 3.9+**（仅用标准库，无需 `pip install` 任何东西）
+  - macOS：终端 `python3 --version`（系统通常自带）
+  - Windows：[python.org](https://www.python.org/downloads/) 下载安装，务必勾选 ✅ **Add Python to PATH**
 
 ### macOS
-1. 下载本仓库 ZIP（绿色 `Code` 按钮 → `Download ZIP`），解压
+
+1. 下载本仓库 ZIP（`Code` → `Download ZIP`），解压
 2. 进入文件夹，终端运行：
    ```bash
    python3 AppPriceTracker.py
@@ -62,15 +39,16 @@
 4. 关闭：在终端窗口按 **Ctrl+C**
 
 ### Windows
+
 1. 下载并解压本仓库 ZIP
 2. 在文件夹里打开 cmd，运行：
    ```bat
    python AppPriceTracker.py
    ```
 3. 浏览器自动打开
-4. 关闭：直接关掉 cmd 黑窗口
+4. 关闭：直接关掉 cmd 窗口
 
-> 想要双击启动可以自建 `.command` / `.bat` 脚本（各 3 行，调用上面的命令即可），此类本地工具不入库。
+> 想要双击启动可自建 `.command` / `.bat` 脚本（各 3 行，调用上面的命令即可），此类本地工具不入库。
 
 ## 🐳 Docker 部署
 
@@ -78,13 +56,13 @@
 
 ```bash
 # 1. 只取 compose 文件
-mkdir app-price && cd app-price
+mkdir app-atlas && cd app-atlas
 curl -O https://raw.githubusercontent.com/oceanxux/AppAtlas/main/docker-compose.yml
 
 # 2. 启动
 docker compose up -d
 
-# 3. 以后更新到最新版
+# 3. 更新到最新版
 docker compose pull && docker compose up -d
 
 # 日志 / 停止
@@ -93,9 +71,9 @@ docker compose down
 ```
 
 - 访问 `http://服务器IP:8765`（端口在 compose 的 `ports` 里改）
-- 账号数据（users.json）与接口缓存（cache.json）持久化在 `./data` 目录，重建容器不丢失
+- 账号（users.json）与缓存（cache.json）持久化在 `./data` 目录，重建容器不丢失
 - 默认管理员 `admin / admin123`，**公网部署请立即在右上角「用户」面板改密码**
-- 若 Packages 未设为 Public，先在服务器执行 `docker login ghcr.io -u oceanxux`（密码用有 `read:packages` 权限的 PAT）
+- 若 Packages 未设为 Public，先在服务器 `docker login ghcr.io -u oceanxux`（密码用带 `read:packages` 权限的 PAT）
 
 本地构建（开发调试）：
 
@@ -105,74 +83,88 @@ git clone https://github.com/oceanxux/AppAtlas.git && cd AppAtlas
 docker compose up -d --build
 ```
 
-### 系统要求
-- **Python 3.7+**
-  - macOS：`python3 --version` 检查（系统通常自带）
-  - Windows：[python.org](https://www.python.org/downloads/) 下载，安装时务必勾选 ✅ "Add Python to PATH"
-- 不需要 `pip install` 任何东西，纯标准库
+## 👤 账号系统
 
-## ✨ 功能
+- **注册 / 登录**：默认开放注册；登录后解锁监控列表、家族大表、多 App 对比、历史走势与 CSV 导出
+- **默认管理员** `admin / admin123`（首次启动自动创建 `users.json`，可用环境变量 `APT_ADMIN_PASSWORD` 覆盖）
+- **管理员**可在右上角「用户」面板：授管理员、重置密码、删号、开关注册、配置接口鉴权门
 
-### 💎 内购 / 订阅模式（核心）
-- 自动并发查询 30 国（可改为全部 175 国）的所有 IAP
-- 按订阅产品分类：ChatGPT Plus / Pro / Go / Plus 年付 …
-- 切换不同订阅看跨国比价
-- 每国显示原币价、折算 CNY/USD、与最低价的百分比差
-- 实测准确：与 App Store 当前实时价格一致
+## 🤖 Telegram 机器人使用
 
-### 📱 应用本身价格模式
-- 一次性买断价格（适合 Minecraft、Procreate 等付费 App）
+App Atlas 内置两个 Telegram 能力，**共用同一个 Bot Token**：
 
-### 通用功能
-- 监控列表（localStorage 持久化，需登录）
-- CSV 导出（需登录）/ 表格复制
-- 暗色模式自动跟随系统 + 手动切换
-- 实时汇率（ECB 数据，每日更新）
-- 多用户支持（注册 / 管理员权限 / 用户管理面板）
+1. **价格监控推送** —— 监控的 App 价格变动时，主动推消息给你
+2. **查价机器人** —— 你主动给机器人发 App 名称 / ID，它回你价格
 
-## 🎯 推荐试用
+### 第 1 步：创建机器人（拿 Token）
 
-| 应用 | App ID | 看点 |
-|---|---|---|
-| ChatGPT | 6448311069 | Plus / Go / Pro 多档订阅 |
-| Spotify | 324684580 | 全球 Premium 价差 |
-| Notion | 1232780281 | Personal Pro 订阅 |
-| Bumble | 930441707 | Boost / Premium |
-| YouTube | 544007664 | YT Premium 订阅 |
-| Tinder | 547702041 | Plus / Gold / Platinum |
+1. 打开 Telegram，搜索并打开 **[@BotFather](https://t.me/BotFather)**
+2. 发送 `/newbot`
+3. 按提示输入**显示名称**（如 `App Atlas 查价`），再输入**用户名**（必须以 `bot` 结尾，如 `my_app_atlas_bot`）
+4. BotFather 回复一条消息，其中 `Use this token to access the HTTP API:` 后面的那串就是 Token，形如：
+   ```
+   123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
 
-## 🔧 技术原理
+### 第 2 步：获取你的 Chat ID
 
-### 数据源
-1. **iTunes Search API** — 应用搜索 + 应用本身价格（公开免费）
-2. **`apps.apple.com/api/apps/v1/...`** — App Store 网页内部用的 API
-   - same-origin 限制，所以**必须有本地后端**做转发
-   - 不需要 token、不被 IP 区域重定向、不需要 cookie
-   - 这是浏览器纯前端做不到的关键原因
-3. **汇率** — 主用 `open.er-api.com`（ECB 数据、免 key），兜底 `@fawazahmed0/currency-api` CDN 镜像
+机器人和推送都需要知道往哪个会话发。二选一即可：
 
-### 架构
-```
-浏览器 (UI) ←→ http://localhost:8765 (Python 后端) ←→ Apple APIs
-   ↑
-浏览器 localStorage 存监控列表 + 历史价格 + 设置
-```
+- **方法 A（推荐，消息可见）**：先给刚创建的机器人随便发一条消息（`/start`），然后用浏览器打开：
+  ```
+  https://api.telegram.org/bot<你的TOKEN>/getUpdates
+  ```
+  返回的 JSON 里，`result[].message.chat.id` 就是你的 Chat ID（数字，如 `987654321`）。
 
-后端约 700 行 Python（`http.server` + `urllib`，含登录鉴权），前端约 2400 行单文件 HTML + JS（无外部库依赖）。
+- **方法 B（拿自己的 user ID）**：在 Telegram 搜 [@userinfobot](https://t.me/userinfobot)，给它发 `/start`，它直接回你的 `Id:`。
+
+### 第 3 步：在 App Atlas 里配置
+
+1. 登录后，点击右上角 **「监控通知」** 页
+2. 在 **Telegram** 渠道中填入 **Bot Token** 与 **Chat ID**
+3. 点 **保存**，再点 **测试**，收到测试消息即配置成功
+
+保存后约 **30 秒**，查价机器人自动上线。
+
+### 第 4 步：使用查价机器人
+
+| 你发的 | 机器人回复 |
+|---|---|
+| App 名称（如 `chatgpt`） | 前 8 条搜索结果（名称 / 买断价 / App ID） |
+| App ID（纯数字或 `id` 开头，如 `6448311069`） | 8 个代表区（US/CN/TR/IN/AR/PK/NG/BR）的订阅最低价，按人民币估价升序 |
+| `/start` 或 `/help` | 用法说明 |
+
+> 价格展示为**各订阅套餐在 8 个快查区的最低档**（含人民币估价），完整跨国比价请用网页端。
+
+### 会话权限（重要）
+
+- 配置了 **Chat ID** 时：机器人**只响应那个 Chat** 的消息，其他人发消息会被忽略（推荐）
+- 未配置 Chat ID 时：任何给这个机器人发消息的人都能查价。**公网部署且在意消耗时，务必填 Chat ID**
+
+## 🔔 价格监控与推送渠道
+
+详情页点「监控」配置通知：
+
+- **触发条件**：降价 / 涨价 / 新增套餐 / 移除套餐（可限定套餐与区域）
+- **轮询间隔**：`MONITOR_HOURS` 环境变量，默认 6 小时
+- **推送渠道**（「监控通知」页配置，可同时启用多个）：
+  - **Telegram** —— `bot_token` + `chat_id`（与查价机器人共用）
+  - **Bark（iOS）** —— `device_key`（+ 可选自建 `server`，默认官方 `api.day.app`）
+  - **HTTP Webhook** —— 任意 `url`，收到 `{"app","events":[...]}` JSON POST
 
 ## 🔌 API 接口
 
-后端启动后提供以下接口（Base URL：`http://127.0.0.1:8765`），方便脚本或其他工具直接调用。
+Base URL：`http://127.0.0.1:8765`。登录后调用受保护接口带请求头 `X-Auth-Token: <token>`；数据类接口也可改用 `X-API-Key`（网页「API」页创建，形如 `atlas_live_...`）。
 
-### 公开接口（无需登录）
+### 数据接口
 
 | 方法 | 路径 | 参数 | 说明 |
 |---|---|---|---|
-| GET | `/api/search` | `q` 关键词/App ID/链接；`country` 区码（默认 us） | 搜索应用（iTunes API，结果含 `description` 简介）|
-| GET | `/api/lookup` | `id` App ID；`country` 区码 | 应用信息与本身买断价格（缓存 30 分钟）|
-| GET | `/api/iap` | `id` App ID；`country` 区码 | 内购/订阅价格（缓存 6 小时；未上架返回 `{"ok":false,"reason":"not_listed"}`）|
-| GET | `/api/top` | 无 | 首页「热门订阅 App」清单（缓存 24 小时）|
-| GET | `/api/fx` | 无 | 实时汇率（USD 基准，er-api 主源 + currency-api 兜底）|
+| GET | `/api/search` | `q` 关键词/App ID/链接；`country` 区码（默认 us） | 搜索应用（含 `description` 简介）|
+| GET | `/api/lookup` | `id` App ID；`country` 区码 | 应用信息与买断价 |
+| GET | `/api/iap` | `id` App ID；`country` 区码 | 内购/订阅价格（未上架返回 `{"ok":false,"reason":"not_listed"}`）|
+| GET | `/api/top` | 无 | 首页「热门订阅 App」清单 |
+| GET | `/api/fx` | 无 | 实时汇率（USD 基准）|
 | GET | `/health` | 无 | 健康检查 `{"ok":true,"ts":...}` |
 
 `/api/iap` 返回结构（节选）：
@@ -192,110 +184,150 @@ docker compose up -d --build
 
 | 方法 | 路径 | Body (JSON) | 说明 |
 |---|---|---|---|
-| POST | `/api/login` | `{"username","password"}` | 登录，返回 `{"ok":true,"token","username","role"}` |
-| POST | `/api/register` | `{"username","password"}` | 注册并自动登录（管理员可关闭；用户名 2-32 位，密码 ≥6 位）|
+| POST | `/api/login` | `{"username","password"}` | 登录，返回 `token`、`role` |
+| POST | `/api/register` | `{"username","password"}` | 注册并自动登录（用户名 2-32 位，密码 ≥6 位）|
 | POST | `/api/logout` | - | 登出（服务端销毁会话）|
 | POST | `/api/password` | `{"old_password","new_password"}` | 修改自己的密码 |
-| GET | `/api/me` | -（带请求头） | 当前登录态 `{"ok":true,"username","role"}` |
+| GET | `/api/me` | - | 当前登录态 |
 
-登录后调用受保护接口需带请求头：`X-Auth-Token: <token>`。token 有效期 7 天（服务重启后需重新登录）。
+token 有效期 7 天（内存态，服务重启后需重新登录）。
 
-**API 密钥方式**：登录后在网页右上角「API」创建密钥（形如 `atlas_live_...`），数据类接口（search / lookup / iap / top / fx / me）均可改用 `X-API-Key: <密钥>` 请求头，适合长期跑的脚本，不受会话过期影响。
-
-### 监控 / 通知 / Telegram（需登录）
+### 监控 / 渠道 / 密钥（需登录）
 
 | 方法 | 路径 | Body (JSON) | 说明 |
 |---|---|---|---|
-| GET | `/api/watch` | - | 我的监控配置列表 |
-| POST | `/api/watch/save` | `{"app_id","name","icon","triggers","offers","regions"}` | 新建/更新监控。`triggers` 取 `drop/raise/new/remove`；`offers` 传套餐 key 数组、`regions` 传区码数组，空数组=监控全部 |
-| POST | `/api/watch/delete` | `{"app_id"}` | 取消监控 |
+| GET / POST | `/api/watch` / `/api/watch/save` / `/api/watch/delete` | `{"app_id","name","icon","triggers","offers","regions"}` | 监控列表增删查 |
 | GET | `/api/notifications` | - | 最近 100 条价格变动事件 |
-| GET | `/api/tg` | - | 当前 Telegram 推送配置 |
-| POST | `/api/tg/save` | `{"bot_token","chat_id"}` | 保存 TG 推送配置 |
-| POST | `/api/tg/test` | - | 发送测试消息 |
+| GET / POST | `/api/channels` / `/api/channels/save` / `/api/channels/test` | `{"type","config"}` | 推送渠道：`tg`→`{"bot_token","chat_id"}`；`bark`→`{"device_key","server"}`；`http`→`{"url"}` |
+| GET / POST | `/api/keys` / `/api/keys/create` / `/api/keys/delete` | `{"name"}` / `{"id"}` | API 密钥管理 |
 
-### 密钥管理（需登录）
+### 管理员接口（请求头需管理员 token）
 
-| 方法 | 路径 | Body (JSON) | 说明 |
-|---|---|---|---|
-| GET | `/api/keys` | - | 密钥列表（含 `last_used`）|
-| POST | `/api/keys/create` | `{"name"}` | 创建 API 密钥 |
-| POST | `/api/keys/delete` | `{"id"}` | 删除密钥 |
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/users` | 用户列表 + 注册/鉴权门开关状态 |
+| POST | `/api/users/create` / `set_role` / `delete` / `set_password` | 用户管理 |
+| POST | `/api/config/set` | `{"allow_register":true}` 开放注册；`{"require_api_key":true\|false\|"auto"}` 接口鉴权门 |
 
-### 管理员接口（请求头需管理员的 token）
+### 接口鉴权门
 
-| 方法 | 路径 | Body (JSON) | 说明 |
-|---|---|---|---|
-| GET | `/api/users` | - | 用户列表 + `allow_register` 开关状态 |
-| POST | `/api/users/create` | `{"username","password","role"}` | 直接创建用户（role: admin/user）|
-| POST | `/api/users/set_role` | `{"username","role"}` | 授予/收回管理员（不能改自己；至少保留一个管理员）|
-| POST | `/api/users/delete` | `{"username"}` | 删除用户 |
-| POST | `/api/users/set_password` | `{"username","password"}` | 重置任意用户密码 |
-| POST | `/api/config/set` | `{"allow_register":true}` | 开放/关闭注册 |
+数据接口（search / lookup / iap / top / fx）的开放程度由「用户」面板的『接口需密钥』开关控制：
+
+- **自动（默认）**：监听 `127.0.0.1` 时开放（本机自用零门槛）；`HOST=0.0.0.0` 或 Docker 公网部署时自动要求登录会话或 `X-API-Key`
+- **手动覆盖**：面板勾选 = 强制要求，取消 = 强制开放，「自动」恢复默认
+- 被拦截时返回 `401 {"ok":false,"error":"api_key_required"}`
 
 ### 调用示例
 
 ```bash
 BASE=http://127.0.0.1:8765
 
-# 搜索应用（含简介）
+# 搜索应用
 curl "$BASE/api/search?q=chatgpt&country=us"
 
-# 查询 ChatGPT 在土耳其的内购/订阅价格
+# 查询 ChatGPT 在土耳其的内购价格
 curl "$BASE/api/iap?id=6448311069&country=tr"
 
 # 登录拿 token
 TOKEN=$(curl -s -X POST $BASE/api/login -H 'Content-Type: application/json' \
   -d '{"username":"admin","password":"admin123"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['token'])")
 
-# 管理员查看用户列表
+# 带 token 查用户列表（管理员）
 curl "$BASE/api/users" -H "X-Auth-Token: $TOKEN"
+
+# 或改用 API 密钥（网页「API」页创建，适合长期脚本）
+curl "$BASE/api/iap?id=6448311069&country=us" -H "X-API-Key: atlas_live_xxx"
 ```
 
-错误格式统一为 `{"ok":false,"error":"<code>"}`（HTTP 4xx/5xx），常见 code：`bad_credentials`、`user_exists`、`password_short`、`register_disabled`、`cannot_modify_self`、`last_admin`。
+错误格式统一为 `{"ok":false,"error":"<code>"}`，常见 code：`bad_credentials`、`user_exists`、`password_short`、`register_disabled`、`cannot_modify_self`、`last_admin`、`api_key_required`。
 
-### 环境变量
+## ⚙️ 环境变量
 
 | 变量 | 默认 | 说明 |
 |---|---|---|
 | `PORT` | `8765` | 监听端口 |
-| `HOST` | `127.0.0.1` | 监听地址（Docker 内为 `0.0.0.0`）|
-| `APT_ADMIN_PASSWORD` | 无 | 首次创建 users.json 时 admin 账号的密码 |
-| `NO_BROWSER` | 无 | 设为 `1` 不自动打开浏览器（后台运行时本就不会弹）|
-| `MONITOR_HOURS` | `6` | 价格监控定时任务的执行间隔（小时）|
+| `HOST` | `127.0.0.1` | 监听地址（Docker 内 `0.0.0.0`；非回环地址会自动开启鉴权门）|
+| `APT_DATA_DIR` | 脚本所在目录 | 账号 / 缓存 / 监控数据目录（Docker 挂卷用）|
+| `APT_ADMIN_PASSWORD` | 无 | 首次创建 users.json 时 admin 的密码 |
+| `NO_BROWSER` | 无 | 设为 `1` 不自动打开浏览器 |
+| `MONITOR_HOURS` | `6` | 价格监控轮询间隔（小时）|
+
+## 🔧 技术原理
+
+### 数据源
+
+1. **iTunes Search API** — 应用搜索 + 应用本身价格（公开免费）
+2. **`apps.apple.com/api/apps/v1/...`** — App Store 网页内部 API，取内购/订阅价格。有 same-origin 限制，所以**必须有本地后端转发**（不需要 token、不被 IP 区域重定向）
+3. **汇率** — 主用 `open.er-api.com`（ECB 数据、免 key），兜底 `@fawazahmed0/currency-api` CDN 镜像，缓存 6 小时
+
+### 架构
+
+```
+浏览器 (UI) ←→ http://localhost:8765 (Python 后端) ←→ Apple APIs
+                    │
+                    ├─ monitor：定时比对监控 App 报价 → TG/Bark/Webhook 推送
+                    └─ tgbot：Telegram 查价机器人（发名称出搜索，发 ID 出各区最低价）
+```
+
+后端为 `appatlas/` 包（`server` 路由 · `store` 用户/鉴权 · `apple` 苹果接口 · `monitor` 监控 · `tgbot` 机器人 · `fx` 汇率 · `notify` 推送 · `cache` 缓存 · `config` 配置），全部标准库；前端为单文件 HTML + JS（无外部库依赖）。
+
+## 📦 文件清单
+
+| 文件 | 说明 |
+|---|---|
+| `AppPriceTracker.py` | 一键启动入口（薄封装，调用 `appatlas.server.main`）|
+| `appatlas/` | 后端包（9 个模块，纯标准库）|
+| `AppPriceTracker.html` | 前端（单文件 HTML+JS，深色模式自适应）|
+| `tests/` | pytest 测试（鉴权门 / 用户存储 / 监控差分 / TG 回复）|
+| `requirements.txt` | 运行时零依赖；仅列出开发用 pytest |
+| `Dockerfile` / `docker-compose.yml` | Docker 部署（含日志轮转上限）|
+| `.github/workflows/docker.yml` | GitHub Actions 自动构建镜像（amd64 + arm64）|
+
+开发 & 测试：
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install pytest
+.venv/bin/python -m pytest tests/ -q
+```
 
 ## ⚠️ 注意事项
 
 - **同时只能跑一个实例**（端口 8765 占用）
-- **iTunes API 限速 ~20 calls/min**：默认并发 5，30 国查询 ~10 秒
-- **某些区域显示"未上架"是真实情况**（如 ChatGPT Pro 在中国大陆/香港未上架）
-- **数据精确到原币种**，跨国比价用实时汇率换算（汇率每 6 小时刷新一次）
+- **iTunes API 限速 ~20 calls/min**：默认并发 5，30 国查询约 10 秒
+- **某些地区显示「未上架」是真实情况**（如 ChatGPT Pro 在中国大陆/香港未上架）
+- **数据精确到原币种**，跨国比价用实时汇率换算（每 6 小时刷新一次）
 
 ## 🐛 常见问题
 
-**Q: 端口被占用？**
-启动时设置环境变量 `PORT=8766`，或编辑 `AppPriceTracker.py` 顶部 `PORT = int(os.environ.get("PORT", "8765"))` 的默认值。
+**Q: 端口被占用？** 设环境变量 `PORT=8766`，或改 `AppPriceTracker.py` 顶部的默认值。
 
-**Q: 公司网络拦截了某个 API？**
-查看启动窗口的报错。如果是 `apps.apple.com` 被拦截，订阅查询会失败但应用本身价格还能用。
+**Q: 公司网络拦截了某个 API？** 看启动窗口报错。若 `apps.apple.com` 被拦，订阅查询会失败但应用本身价格仍可用。
 
-**Q: macOS 提示"未签名"？**
-右键文件 → 打开 → 在弹出的安全提示里点"打开"。这个项目本地运行不联网你的数据，可以放心用。
+**Q: macOS 提示"未签名"？** 右键文件 → 打开 → 安全提示里点"打开"。本项目本地运行，请放心。
 
-**Q: 换 App 之后查询很慢？**
-正常。30 国 × 1 个 API 调用 = 30 次请求，并发 5 路约 8-15 秒。
+**Q: 换 App 之后查询很慢？** 正常。30 国 × 1 次 API 调用，并发 5 路约 8-15 秒。
+
+**Q: Telegram 机器人不回复？** 确认 Bot Token 填对、已保存，保存后等 ~30 秒；填了 Chat ID 的话，确认发消息的就是那个 Chat。
+
+## 🎯 推荐试用
+
+| 应用 | App ID | 看点 |
+|---|---|---|
+| ChatGPT | 6448311069 | Plus / Go / Pro 多档订阅 |
+| Spotify | 324684580 | 全球 Premium 价差 |
+| Notion | 1232780281 | Personal Pro 订阅 |
+| Bumble | 930441707 | Boost / Premium |
+| YouTube | 544007664 | YT Premium 订阅 |
 
 ## 📜 License
 
 [MIT](LICENSE) © 2026 paradossio
 
 ## 🙏 致谢
+
 - [fork 大佬](https://github.com/paradossio/AppPriceTracker-iOS)
-- [Apple iTunes Search API](https://performance-partners.apple.com/search-api) — 应用搜索 + 价格数据源
+- [Apple iTunes Search API](https://performance-partners.apple.com/search-api)
 - [@fawazahmed0/currency-api](https://github.com/fawazahmed0/exchange-api) — 免费汇率 CDN
 - [BestLemoon/ApplePriceTracker](https://github.com/BestLemoon/ApplePriceTracker) — App Store IAP 解析思路启发
 
-## 💡 反馈与贡献
-
 发现 bug 或想加新功能？欢迎 [开 issue](../../issues) 或 PR。
-

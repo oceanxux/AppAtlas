@@ -341,18 +341,32 @@
   .auth-switch a{cursor:pointer}
   .chk-line{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted2);cursor:pointer}
   .chk-line input{accent-color:var(--accent)}
-  .admin-user-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--hair)}
-  .admin-user-row:last-child{border-bottom:none}
-  .admin-user-row .uname{flex:1;font-weight:500;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .admin-user-row .udate{color:var(--muted);font-size:11px;flex-shrink:0}
-  .admin-user-row select{height:30px;padding:0 8px;border-radius:8px;border:1px solid var(--border);
-    background:var(--panel);color:var(--text);font-size:12px;font-family:inherit;flex-shrink:0}
-  .admin-create{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .chk-line.reg-toggle{background:var(--panel2);border:1px solid var(--hair2);
+    border-radius:var(--pill);padding:5px 12px;gap:7px;flex-shrink:0}
+  .admin-list{display:flex;flex-direction:column;gap:8px}
+  .admin-user-row{display:flex;align-items:center;gap:12px;background:var(--panel);
+    border:1px solid var(--hair2);border-radius:14px;padding:10px 12px;
+    transition:border-color .15s,box-shadow .15s}
+  .admin-user-row:hover{border-color:var(--border);box-shadow:var(--shadow-sm)}
+  .admin-user-row .avatar{width:36px;height:36px;border-radius:11px;background:var(--accent-soft);
+    color:var(--accent);font-weight:700;font-size:14px;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center}
+  .admin-user-row .u-main{flex:1;min-width:0}
+  .admin-user-row .u-main b{display:block;font-size:13.5px;font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .admin-user-row .u-main b em{font-style:normal;font-weight:500;font-size:11px;color:var(--muted)}
+  .admin-user-row .u-main>span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+  .admin-user-row select{height:32px;padding:0 8px;border-radius:9px;border:1px solid var(--border);
+    background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;flex-shrink:0;outline:none;
+    transition:border-color .15s,box-shadow .15s}
+  .admin-user-row select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .admin-create{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:14px;
+    border-top:1px solid var(--hair)}
   .admin-create input,.admin-create select{height:36px;padding:0 12px;border-radius:10px;
     border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;
-    font-family:inherit;outline:none}
+    font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
   .admin-create input{flex:1;min-width:110px}
-  .admin-create input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .admin-create input:focus,.admin-create select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   #countryFilter{flex:1;min-width:140px;height:34px;padding:0 14px;border-radius:var(--pill);
     border:1px solid var(--border);background:var(--panel);color:var(--text);font-size:13px;
     outline:none;font-family:inherit}
@@ -399,15 +413,68 @@
   .multi-app-picker .offers-grid{display:flex;flex-wrap:wrap;gap:6px}
 
   .detail-loading{text-align:center;padding:80px 0;color:var(--muted);font-size:13.5px}
+
+  /* ===== 导航集群（登录态） ===== */
+  .nav-cluster{display:flex;align-items:center;gap:1px;background:var(--panel);
+    border:1px solid var(--hair2);border-radius:var(--pill);padding:3px;
+    box-shadow:var(--shadow-sm)}
+  .nbtn{height:28px;min-width:28px;padding:0 10px;border:none;background:transparent;
+    border-radius:var(--pill);cursor:pointer;font-size:12px;color:var(--muted2);
+    display:inline-flex;align-items:center;justify-content:center;gap:5px;font-weight:600;
+    transition:all .13s;font-family:inherit}
+  .nbtn:hover{background:var(--panel2);color:var(--text)}
+  .nav-sep{width:1px;height:14px;background:var(--hair2);margin:0 2px}
+  .notify-dot{position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;
+    background:var(--high);border:1.5px solid var(--panel)}
+  #navNotifyBtn{position:relative}
+  .nav-user-name{font-size:12px;color:var(--text);padding:0 6px 0 8px;max-width:110px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;
+    display:inline-flex;align-items:center}
+  .nav-user-name::before{content:"";display:inline-block;width:7px;height:7px;
+    border-radius:50%;background:var(--accent);margin-right:6px;flex-shrink:0}
+  @media (max-width:900px){
+    .nbtn-txt{font-size:0;padding:0 9px}
+    #navApiBtn::before{content:"🔑";font-size:13px}
+    #navAdminBtn::before{content:"👤";font-size:13px}
+  }
+  .btn.store{border-color:rgba(10,124,255,.45);color:#0a7cff;background:rgba(10,124,255,.06)}
+  .btn.store:hover{background:rgba(10,124,255,.12);border-color:rgba(10,124,255,.7)}
   #detailBody{padding-bottom:48px}
   .narrow-page{padding-bottom:48px}
 
   /* ===== 通知渠道卡片 ===== */
-  .ch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-  .ch-card .ch-head{margin-bottom:10px;font-size:14px}
-  .key-create.col{flex-direction:column;align-items:stretch}
-  .key-create.col input{min-width:0;width:100%}
-  .ch-actions{display:flex;gap:8px;margin-top:10px}
+  .page-sub{font-size:13px;color:var(--muted);margin:-10px 0 18px}
+  .ch-list{display:flex;flex-direction:column;gap:10px}
+  .ch-row{display:flex;align-items:center;gap:16px;background:var(--panel);
+    border:1px solid var(--hair2);border-radius:16px;padding:14px 16px;
+    transition:border-color .15s,box-shadow .15s}
+  .ch-row:hover{border-color:var(--border);box-shadow:var(--shadow-sm)}
+  .ch-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .ch-ident{display:flex;align-items:center;gap:12px;flex:0 0 232px;min-width:0}
+  .ch-ico{width:42px;height:42px;border-radius:12px;display:inline-flex;align-items:center;
+    justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.10)}
+  .ch-ico svg{width:100%;height:100%;display:block}
+  .ch-ico.tg{background:transparent}
+  .ch-ico.bark{background:#fff;border:1px solid var(--hair2)}
+  .ch-ico.bark img{width:100%;height:100%;object-fit:cover;display:block}
+  .ch-ico.http{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+  .ch-ico.http svg{width:26px;height:26px}
+  .ch-t{min-width:0}
+  .ch-t b{display:block;font-size:14px}
+  .ch-t b em{font-style:normal;font-size:10.5px;font-weight:600;color:var(--muted);
+    background:var(--panel2);padding:1px 6px;border-radius:5px;margin-left:5px;vertical-align:1px}
+  .ch-t span{display:block;font-size:11px;color:var(--muted);margin-top:3px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ch-form{display:flex;gap:8px;flex:1;align-items:center;flex-wrap:wrap}
+  .ch-form input{flex:1;min-width:150px;height:36px;padding:0 13px;border-radius:10px;
+    border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12.5px;
+    font-family:inherit;outline:none;transition:border-color .15s}
+  .ch-form input:focus{border-color:var(--accent)}
+  .ch-form input::placeholder{color:var(--muted)}
+  @media (max-width:760px){
+    .ch-row{flex-direction:column;align-items:stretch}
+    .ch-ident{flex:none}
+  }
 
   /* ===== 详情页丰富化：截图 / 关于 / 信息 ===== */
   .shot-strip{display:flex;gap:10px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
@@ -420,10 +487,12 @@
   .about-text{color:var(--muted2);font-size:13px;line-height:1.7;white-space:pre-line;
     display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
   .about-text.expanded{display:block;-webkit-line-clamp:unset}
-  .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:16px}
-  .info-item{background:var(--panel);border:1px solid var(--hair2);border-radius:12px;padding:10px 14px}
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:16px}
+  .info-item{background:var(--panel);border:1px solid var(--hair2);border-radius:12px;
+    padding:10px 14px;min-height:56px}
   .info-item .ik{font-size:11px;color:var(--muted);font-weight:500}
-  .info-item .iv{font-size:13px;font-weight:600;margin-top:2px;word-break:break-all}
+  .info-item .iv{font-size:13px;font-weight:600;margin-top:3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* ===== 监控弹窗 ===== */
   .form-label{font-size:12.5px;font-weight:600;color:var(--muted2);margin:14px 0 8px}
@@ -450,9 +519,10 @@
     background:var(--panel2);padding:7px 12px;border-radius:8px;word-break:break-all}
   .key-create{display:flex;gap:8px;flex-wrap:wrap}
   .key-create input{flex:1;min-width:150px;height:36px;padding:0 12px;border-radius:10px;
-    border:1px solid var(--border);background:var(--panel);color:var(--text);font-size:13px;
-    font-family:inherit;outline:none}
+    border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;
+    font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
   .key-create input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  #keyTableWrap:not(:empty){margin-top:12px}
   .key-table{width:100%;border-collapse:collapse;font-size:13px}
   .key-table th{text-align:left;font-size:11.5px;color:var(--muted);padding:8px 10px;
     border-bottom:1px solid var(--hair2)}
@@ -475,8 +545,11 @@
   .evt-badge.remove{background:var(--panel2);color:var(--muted)}
 
   /* ===== 登录弹窗美化 ===== */
-  .login-mark{display:flex;justify-content:center;margin-bottom:10px}
-  .login-mark svg{width:44px;height:44px}
+  .login-mark{display:flex;justify-content:center;margin-bottom:14px}
+  .login-mark .mark-tile{width:56px;height:56px;border-radius:16px;background:var(--accent-soft);
+    border:1px solid var(--hair2);color:var(--text);
+    display:inline-flex;align-items:center;justify-content:center}
+  .login-mark svg{width:30px;height:30px;display:block}
   #loginModal .modal{text-align:center}
   #loginModal .field{text-align:left}
   #loginModal .modal-actions{justify-content:center}
@@ -515,11 +588,20 @@
         <button data-lang="zh" class="active">中</button>
         <button data-lang="en">EN</button>
       </div>
-      <span class="user-chip" id="navUser" style="display:none"></span>
-      <button class="btn sm" id="navNotifyBtn" style="display:none" title="🔔">🔔</button>
-      <button class="btn sm" id="navApiBtn" style="display:none" data-i18n="apiNav"></button>
-      <button class="btn sm" id="navAdminBtn" style="display:none" data-i18n="userMgmt"></button>
-      <button class="btn sm" id="logoutBtn" style="display:none" data-i18n="logout"></button>
+      <div class="nav-cluster" id="navCluster" style="display:none">
+        <button class="nbtn" id="navNotifyBtn" title="监控通知">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notify-dot" id="notifyDot" style="display:none"></span>
+        </button>
+        <span class="nav-sep"></span>
+        <button class="nbtn nbtn-txt" id="navApiBtn" data-i18n="apiNav"></button>
+        <button class="nbtn nbtn-txt" id="navAdminBtn" data-i18n="userMgmt"></button>
+        <span class="nav-sep"></span>
+        <span class="nav-user-name" id="navUser"></span>
+        <button class="nbtn" id="logoutBtn" title="退出登录">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
       <button class="btn sm primary" id="navLoginBtn" data-i18n="loginBtn"></button>
     </div>
   </div>
@@ -596,6 +678,7 @@
           </div>
         </div>
         <div class="toolbar">
+          <button class="btn store" id="appStoreBtn" style="display:none" data-i18n="storeBtn"></button>
           <button class="btn" id="addWatchBtn" data-i18n="addWatch"></button>
           <button class="btn" id="watchCfgBtn" data-i18n="watchCfg"></button>
           <button class="btn" id="familyBtn" data-i18n="familyTable"></button>
@@ -684,7 +767,7 @@
 <!-- ===== 登录 / 注册弹窗 ===== -->
 <div class="modal-bg" id="loginModal">
   <div class="modal narrow">
-    <div class="login-mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="none" stroke="#4f46e5" stroke-linecap="round"><path d="M46.74 31.05A17 17 0 1 1 42.02 21.98" stroke-width="4.4"/><ellipse cx="30" cy="34" rx="7" ry="17" stroke-width="2.6" opacity=".35"/><path d="M13.5 34h33" stroke-width="2.6" opacity=".35"/></g><path d="M13 47 26 38 33 42 49.5 20" fill="none" stroke="#f59e0b" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="52" cy="16.5" r="4.4" fill="#f59e0b"/></svg></div>
+    <div class="login-mark"><span class="mark-tile"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round"><path d="M46.74 31.05A17 17 0 1 1 42.02 21.98" stroke-width="4.4"/><ellipse cx="30" cy="34" rx="7" ry="17" stroke-width="2.6" opacity=".35"/><path d="M13.5 34h33" stroke-width="2.6" opacity=".35"/></g><path d="M13 47 26 38 33 42 49.5 20" fill="none" stroke="var(--accent)" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="52" cy="16.5" r="4.4" fill="var(--accent)"/></svg></span></div>
     <h3 id="authTitle"></h3>
     <p class="desc" id="authDesc"></p>
     <label class="field"><span data-i18n="username"></span>
@@ -705,9 +788,14 @@
   <div class="modal">
     <div class="head-row">
       <h3 data-i18n="userMgmt"></h3>
-      <label class="chk-line"><input type="checkbox" id="allowRegister"><span data-i18n="allowRegister"></span></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <label class="chk-line reg-toggle"><input type="checkbox" id="requireApiKey"><span data-i18n="requireApiKey"></span></label>
+        <label class="chk-line reg-toggle"><input type="checkbox" id="allowRegister"><span data-i18n="allowRegister"></span></label>
+        <button class="btn ghost sm" id="apiGateAutoBtn" data-i18n="gateAuto"></button>
+      </div>
     </div>
-    <div id="adminUserList"></div>
+    <div class="admin-list" id="adminUserList"></div>
+    <div class="form-label" data-i18n="adminAddUser" style="margin-top:16px;margin-bottom:0"></div>
     <div class="admin-create">
       <input id="newUserName" data-i18n-attr="placeholder" data-i18n="username">
       <input id="newUserPass" type="password" data-i18n-attr="placeholder" data-i18n="password">
@@ -715,7 +803,7 @@
         <option value="user" data-i18n="roleUser"></option>
         <option value="admin" data-i18n="roleAdmin"></option>
       </select>
-      <button class="btn sm" id="createUserBtn" data-i18n="createUser"></button>
+      <button class="btn sm primary" id="createUserBtn" data-i18n="createUser"></button>
     </div>
     <div class="modal-actions">
       <button class="btn primary" id="adminClose" data-i18n="close"></button>
@@ -836,11 +924,13 @@
       <div class="api-row"><span class="api-k" data-i18n="apiAddr"></span><code class="api-url" id="apiOrigin"></code></div>
     </div>
     <div class="section-title" style="margin-top:20px"><span data-i18n="apiKeyTitle"></span></div>
-    <div class="key-create">
-      <input id="keyNameInput" data-i18n-attr="placeholder" data-i18n="keyNamePh">
-      <button class="btn primary sm" id="createKeyBtn" data-i18n="createKey"></button>
+    <div class="panel-card">
+      <div class="key-create">
+        <input id="keyNameInput" data-i18n-attr="placeholder" data-i18n="keyNamePh">
+        <button class="btn primary sm" id="createKeyBtn" data-i18n="createKey"></button>
+      </div>
+      <div id="keyTableWrap"></div>
     </div>
-    <div id="keyTableWrap" style="margin-top:12px"></div>
     <div class="section-title" style="margin-top:24px"><span data-i18n="apiDocs"></span></div>
     <pre class="api-docs" id="apiDocs"></pre>
   </div>
@@ -849,31 +939,52 @@
 <!-- ===== 价格通知 ===== -->
 <div class="view" id="viewNotify">
   <div class="container narrow-page">
-    <div class="page-head"><h2 data-i18n="notifyTitle"></h2></div>
-    <div class="ch-grid">
-      <div class="panel-card ch-card">
-        <div class="ch-head">✈️ <b>Telegram</b></div>
-        <div class="key-create col">
-          <input id="tgTokenInput" data-i18n-attr="placeholder" data-i18n="tgTokenPh">
-          <input id="tgChatInput" data-i18n-attr="placeholder" data-i18n="tgChatPh">
+    <div class="page-head">
+      <h2 data-i18n="notifyTitle"></h2>
+      <p class="page-sub" data-i18n="notifySub"></p>
+    </div>
+    <div class="ch-list">
+      <div class="ch-row">
+        <div class="ch-ident">
+          <span class="ch-ico tg"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><linearGradient id="tgChGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#2AABEE"/><stop offset="1" stop-color="#229ED9"/>
+            </linearGradient></defs>
+            <circle cx="12" cy="12" r="12" fill="url(#tgChGrad)"/>
+            <path fill="#fff" d="M16.906 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg></span>
+          <div class="ch-t"><b>Telegram</b><span data-i18n="tgHint"></span></div>
         </div>
-        <div class="ch-actions">
-          <button class="btn sm" id="tgSaveBtn" data-i18n="save"></button>
+        <div class="ch-form">
+          <input id="tgTokenInput" data-i18n-attr="placeholder" data-i18n="tgTokenPh">
+          <input id="tgChatInput" data-i18n-attr="placeholder" data-i18n="tgChatPh" style="max-width:120px">
+          <button class="btn sm primary" id="tgSaveBtn" data-i18n="save"></button>
           <button class="btn sm" id="tgTestBtn" data-i18n="chTest"></button>
         </div>
-        <div class="hint" data-i18n="tgHint"></div>
       </div>
-      <div class="panel-card ch-card">
-        <div class="ch-head">🐶 <b>Bark (iOS)</b></div>
-        <div class="key-create col">
-          <input id="barkKeyInput" data-i18n-attr="placeholder" data-i18n="barkKeyPh">
-          <input id="barkServerInput" data-i18n-attr="placeholder" data-i18n="barkServerPh">
+      <div class="ch-row">
+        <div class="ch-ident">
+          <span class="ch-ico bark"><img src="https://bark.day.app/_media/Icon.png" alt="Bark" loading="lazy"
+            onerror="this.style.display='none';this.parentElement.textContent='🐶'"></span>
+          <div class="ch-t"><b>Bark <em>iOS</em></b><span data-i18n="barkHint"></span></div>
         </div>
-        <div class="ch-actions">
-          <button class="btn sm" id="barkSaveBtn" data-i18n="save"></button>
+        <div class="ch-form">
+          <input id="barkKeyInput" data-i18n-attr="placeholder" data-i18n="barkKeyPh">
+          <input id="barkServerInput" data-i18n-attr="placeholder" data-i18n="barkServerPh" style="max-width:150px">
+          <button class="btn sm primary" id="barkSaveBtn" data-i18n="save"></button>
           <button class="btn sm" id="barkTestBtn" data-i18n="chTest"></button>
         </div>
-        <div class="hint" data-i18n="barkHint"></div>
+      </div>
+      <div class="ch-row">
+        <div class="ch-ident">
+          <span class="ch-ico http"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 16c0-1.84 1-3.45 2.48-4.32c.67-.39 1.52.08 1.52.86c0 .36-.19.68-.5.86c-.9.52-1.5 1.49-1.5 2.6c0 1.85 1.68 3.31 3.6 2.94c1.42-.28 2.4-1.61 2.4-3.06c0-.49.39-.88.88-.88h5c.27-.31.67-.5 1.12-.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5c-.44 0-.84-.19-1.12-.5H11.9A5 5 0 0 1 2 16m14.37-9c.65 0 1.14-.62.97-1.25A4.99 4.99 0 0 0 12.5 2a5.002 5.002 0 0 0-3.45 8.62l-2.35 3.9c-.68.14-1.2.75-1.2 1.48c0 .83.67 1.5 1.5 1.5a1.498 1.498 0 0 0 1.43-1.95l2.86-4.75c.25-.41.13-.95-.28-1.19c-.9-.53-1.51-1.5-1.51-2.61c0-1.65 1.35-3 3-3c1.38 0 2.54.93 2.89 2.2c.13.46.51.8.98.8m.63 6c-.38 0-.75.07-1.09.2c-.4.16-.86-.04-1.08-.41l-2.6-4.32C11.53 8.35 11 7.74 11 7c0-.83.67-1.5 1.5-1.5S14 6.17 14 7c0 .15-.02.29-.06.43l2.19 3.65c.28-.05.57-.08.87-.08c2.76 0 5 2.24 5 5s-2.24 5-5 5c-.86 0-1.68-.22-2.39-.61c-.92-.5-.58-1.89.47-1.89c.17 0 .34.05.49.14c.42.23.91.36 1.43.36c1.65 0 3-1.35 3-3s-1.35-3-3-3"/></svg></span>
+          <div class="ch-t"><b>HTTP Webhook</b><span data-i18n="httpHint"></span></div>
+        </div>
+        <div class="ch-form">
+          <input id="httpUrlInput" data-i18n-attr="placeholder" data-i18n="httpUrlPh">
+          <button class="btn sm primary" id="httpSaveBtn" data-i18n="save"></button>
+          <button class="btn sm" id="httpTestBtn" data-i18n="chTest"></button>
+        </div>
       </div>
     </div>
     <div class="section-title" style="margin-top:22px"><span data-i18n="eventsTitle"></span></div>
@@ -984,6 +1095,10 @@ const I18N = {
     regFail:"注册失败", userTaken:"用户名已存在", pwdShort:"密码至少 6 位",
     badUsername:"用户名需 2-32 位（中英文、数字、下划线、连字符）", regDisabled:"当前未开放注册，请联系管理员",
     userMgmt:"用户", allowRegister:"开放注册", createUser:"创建", roleAdmin:"管理员", roleUser:"普通用户",
+    adminAddUser:"添加用户",
+    requireApiKey:"接口需密钥", gateAuto:"自动",
+    gateAutoTitle:"恢复自动：本机监听开放，公网/Docker 部署要求登录或密钥",
+    apiNeedAuth:"数据接口已开启保护，请先登录",
     resetPwd:"重置密码", newPwdFor:"为 {u} 设置新密码：", confirmDel:"确定删除用户 {u}？",
     usersLoadFail:"加载用户列表失败", needAdmin:"需要管理员权限", opDone:"操作成功 ✓",
     cannotOpSelf:"不能对自己执行该操作", lastAdmin:"至少保留一个管理员",
@@ -995,7 +1110,11 @@ const I18N = {
     apiKeyTitle:"API 密钥", keyNamePh:"密钥名称（如 python 脚本）", createKey:"创建密钥",
     keyName:"密钥名称", apiKeyLbl:"密钥", lastUsed:"最后使用", clickCopy:"点击复制",
     noKeys:"还没有密钥，创建一个即可通过 API 调用本站数据", apiDocs:"调用示例",
-    notifyTitle:"价格通知", tgConfig:"Telegram 推送",
+    notifyTitle:"监控通知", notifySub:"价格变动会推送到你配置的渠道，可同时启用多个",
+    tgConfig:"Telegram 推送",
+    storeBtn:"App Store",
+    httpUrlPh:"Webhook URL（POST JSON）",
+    httpHint:"价格变动时向该地址 POST JSON（含 app 与 events 数组），适合 n8n / 自建服务。",
     tgTokenPh:"Bot Token（@BotFather 创建）", tgChatPh:"Chat ID",
     tgTest:"发送测试", tgTestOk:"✅ 测试消息已发送", tgTestFail:"发送失败，请检查配置",
     chTest:"测试", chTestOk:"✅ 测试推送已发送", chTestFail:"发送失败，请检查配置",
@@ -1063,6 +1182,10 @@ const I18N = {
     regFail:"Sign up failed", userTaken:"Username already taken", pwdShort:"Password must be at least 6 characters",
     badUsername:"Username: 2-32 chars (letters, digits, underscore, hyphen, CJK)", regDisabled:"Registration is currently closed. Contact the admin.",
     userMgmt:"Users", allowRegister:"Open registration", createUser:"Create", roleAdmin:"Admin", roleUser:"User",
+    adminAddUser:"Add user",
+    requireApiKey:"API needs key", gateAuto:"Auto",
+    gateAutoTitle:"Auto: open on loopback, require login or API key otherwise",
+    apiNeedAuth:"API is protected — please sign in",
     resetPwd:"Reset password", newPwdFor:"New password for {u}:", confirmDel:"Delete user {u}?",
     usersLoadFail:"Failed to load users", needAdmin:"Admin required", opDone:"Done ✓",
     cannotOpSelf:"You cannot modify your own account here", lastAdmin:"At least one admin must remain",
@@ -1074,7 +1197,11 @@ const I18N = {
     apiKeyTitle:"API Keys", keyNamePh:"Key name (e.g. python script)", createKey:"Create key",
     keyName:"Name", apiKeyLbl:"Key", lastUsed:"Last used", clickCopy:"Click to copy",
     noKeys:"No keys yet. Create one to call this site's data via API", apiDocs:"Usage examples",
-    notifyTitle:"Price Alerts", tgConfig:"Telegram Push",
+    notifyTitle:"Watch Alerts", notifySub:"Price changes are pushed to every channel you configure — combine freely",
+    tgConfig:"Telegram Push",
+    storeBtn:"App Store",
+    httpUrlPh:"Webhook URL (POST JSON)",
+    httpHint:"On price changes we POST JSON ({app, events[]}) to this URL. Works with n8n / your own service.",
     tgTokenPh:"Bot Token (create via @BotFather)", tgChatPh:"Chat ID",
     tgTest:"Send test", tgTestOk:"✅ Test message sent", tgTestFail:"Send failed, check config",
     chTest:"Test", chTestOk:"✅ Test push sent", chTestFail:"Send failed, check config",
@@ -1115,6 +1242,8 @@ function applyI18N(){
     else el.textContent = t(k);
   });
   document.querySelectorAll(".lang-switch button").forEach(b => b.classList.toggle("active", b.dataset.lang === LANG));
+  const gateBtn = document.getElementById("apiGateAutoBtn");
+  if (gateBtn) gateBtn.title = t("gateAutoTitle");
   applyThemeTitle();
   applyAuthMode();
   regionEN = null;
@@ -1187,8 +1316,23 @@ async function api(path, params){
   const headers = {};
   if (state.token) headers["X-Auth-Token"] = state.token;
   const r = await fetch(`/api/${path}?${qs}`, { headers });
-  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  if(!r.ok){
+    if (r.status === 401) await apiAuthHint(r);
+    throw new Error(`HTTP ${r.status}`);
+  }
   return r.json();
+}
+/* 数据接口被「接口需密钥」拦截时:提示并引导登录(15s 内只弹一次,防并发轰炸) */
+async function apiAuthHint(r){
+  try{ const d = await r.json(); if (!d || d.error !== "api_key_required") return; }
+  catch(_){ return; }
+  if (authUser) return;
+  const now = Date.now();
+  if (!apiAuthHint._t || now - apiAuthHint._t > 15000){
+    apiAuthHint._t = now;
+    toast(t("apiNeedAuth"));
+    openLogin();
+  }
 }
 async function pool(items, worker, conc=6, onProg){
   let done=0, i=0; const out=[];
@@ -1349,12 +1493,8 @@ function doLogout(){
 }
 function updateAuthUI(){
   $("navLoginBtn").style.display = authUser ? "none" : "";
-  $("navUser").style.display = authUser ? "" : "none";
-  $("logoutBtn").style.display = authUser ? "" : "none";
-  $("navNotifyBtn").style.display = authUser ? "" : "none";
-  $("navApiBtn").style.display = authUser ? "" : "none";
-  $("navAdminBtn").style.display = (authUser && authUser.role === "admin") ? "" : "none";
-  if (authUser) $("navUser").textContent = "👤 " + authUser.name;
+  $("navCluster").style.display = authUser ? "flex" : "none";
+  if (authUser) $("navUser").textContent = authUser.name;
   $("addWatchBtn").classList.toggle("gated-locked", !authUser);
   $("familyBtn").classList.toggle("gated-locked", !authUser);
   $("exportBtn").classList.toggle("gated-locked", !authUser);
@@ -1385,13 +1525,15 @@ async function reloadAdmin(){
     const d = await r.json();
     if (!d.ok){ toast(t("needAdmin")); return; }
     $("allowRegister").checked = !!d.allow_register;
+    $("requireApiKey").checked = !!d.require_api_key_effective;
     const dateFmt = ts => ts ? new Date(ts*1000).toLocaleDateString(LANG==="en"?"en-US":"zh-CN") : "";
     const isAdmin = authUser && authUser.role === "admin";
     $("adminUserList").innerHTML = d.users.map(u=>{
       const self = authUser && u.username === authUser.name;
       return `<div class="admin-user-row">
-        <span class="uname">${esc(u.username)}${self?` <span style="color:var(--muted);font-size:11px">(${t("you")})</span>`:""}</span>
-        <span class="udate">${dateFmt(u.created_at)}</span>
+        <span class="avatar">${esc(u.username.slice(0,1).toUpperCase())}</span>
+        <span class="u-main"><b>${esc(u.username)}${self?` <em>(${t("you")})</em>`:""}</b>
+          <span>${dateFmt(u.created_at)||"—"}</span></span>
         <select data-role-for="${esc(u.username)}" ${self||!isAdmin?"disabled":""}>
           <option value="admin" ${u.role==="admin"?"selected":""}>${t("roleAdmin")}</option>
           <option value="user" ${u.role!=="admin"?"selected":""}>${t("roleUser")}</option>
@@ -1563,7 +1705,7 @@ async function showDetail(appId, seq){
   $("iapCount").textContent = "0";
   $("chartPanel").style.display = "none";
   try{
-    const d = await api("lookup", { id: appId, country:"us" });
+    const d = await api("lookup", { id: appId, country:"us", lang: LANG==="en" ? "en_us" : "zh_cn" });
     if (seq !== routeSeq) return;
     if (!d.resultCount) throw new Error("not found");
     currentApp = d.results[0];
@@ -1606,7 +1748,8 @@ function renderDetailHeader(){
   if (app.contentAdvisoryRating) badges.push(app.contentAdvisoryRating);
   if (app.trackId) badges.push("ID: " + app.trackId);
   $("appBadges").innerHTML = badges.map(b=>`<span class="badge">${esc(b)}</span>`).join("");
-  $("appDesc").textContent = app.description || "";
+  $("appDesc").textContent = (app.description || "").split("\n")[0];
+  $("appStoreBtn").style.display = "";
   // 截图条
   const shots = app.screenshotUrls || [];
   const strip = $("shotStrip");
@@ -2610,6 +2753,7 @@ function showNotify(){
         $("tgChatInput").value = ch.tg?.chat_id || "";
         $("barkKeyInput").value = ch.bark?.device_key || "";
         $("barkServerInput").value = ch.bark?.server || "";
+        $("httpUrlInput").value = ch.http?.url || "";
       }
     }).catch(()=>{});
   fetch("/api/notifications", {headers:{"X-Auth-Token": state.token || ""}})
@@ -2727,6 +2871,17 @@ $("barkTestBtn").addEventListener("click", async ()=>{
   const r = await postJSON("channels/test", {type:"bark"});
   toast(r.ok ? t("chTestOk") : t("chTestFail"));
 });
+$("httpSaveBtn").addEventListener("click", async ()=>{
+  const r = await postJSON("channels/save", {type:"http", config:{url: $("httpUrlInput").value.trim()}});
+  toast(r.ok ? t("saved") : authErrText(r.error));
+});
+$("httpTestBtn").addEventListener("click", async ()=>{
+  const r = await postJSON("channels/test", {type:"http"});
+  toast(r.ok ? t("chTestOk") : t("chTestFail"));
+});
+$("appStoreBtn").addEventListener("click", ()=>{
+  if (currentApp) window.open("https://apps.apple.com/us/app/id" + currentApp.trackId, "_blank");
+});
 
 /* 登录 / 注册 / 用户管理 */
 $("navLoginBtn").addEventListener("click", ()=>openLogin("login"));
@@ -2736,6 +2891,8 @@ $("navAdminBtn").addEventListener("click", openAdmin);
 $("adminClose").addEventListener("click", ()=>$("adminModal").classList.remove("show"));
 $("adminModal").addEventListener("click", e=>{ if(e.target.id==="adminModal") e.target.classList.remove("show"); });
 $("allowRegister").addEventListener("change", e=>adminAction("config/set", { allow_register: e.target.checked }));
+$("requireApiKey").addEventListener("change", e=>adminAction("config/set", { require_api_key: e.target.checked }));
+$("apiGateAutoBtn").addEventListener("click", ()=>adminAction("config/set", { require_api_key: "auto" }));
 $("createUserBtn").addEventListener("click", async ()=>{
   const u = $("newUserName").value.trim(), p = $("newUserPass").value, role = $("newUserRole").value;
   if (!u || !p) return;
