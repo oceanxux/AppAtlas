@@ -1,7 +1,7 @@
 services:
   app-price:
     # 拉取 GitHub Actions 自动构建的镜像（推荐）
-    image: ghcr.io/oceanxux/appatlas:latest
+    image: ghcr.io/oceanxux/appatlas:main
     # 本地构建（开发调试用）：注释掉上面 image 行，取消下行注释
     # build: .
     container_name: app-price
