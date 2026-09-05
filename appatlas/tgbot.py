@@ -122,15 +122,16 @@ def extract_id_loose(s):
 
 # ---------- 数据获取(与网页端同缓存键) ----------
 
-def lookup_cached(aid, cc):
-    """iTunes lookup(与 /api/lookup 同缓存键,lang 为空)。"""
+def lookup_cached(aid, cc, lang="zh_cn"):
+    """iTunes lookup。默认 lang=zh_cn 让简介/更新说明为中文。"""
     cc = (cc or "us").lower()
-    key = f"lookup:{aid}:{cc}:"
+    key = f"lookup:{aid}:{cc}:{lang}"
 
     def _fetch():
         try:
             return http_get_json(
-                f"https://itunes.apple.com/lookup?id={aid}&country={cc}&entity=software")
+                f"https://itunes.apple.com/lookup?id={aid}&country={cc}"
+                f"&entity=software&lang={lang}")
         except Exception:
             return None
     return cache.cached_fetch(key, 86400, _fetch,
@@ -385,15 +386,8 @@ def tg_handle_message(token, msg):
     if text.startswith("/"):
         reply = ((msg.get("reply_to_message") or {}).get("text") or "").strip()
         return tg_handle_command(token, chat, text, reply)
-    tg_call(token, "sendChatAction", {"chat_id": chat, "action": "typing"}, timeout=8)
-    aid, linkcc = extract_target(text)
-    if aid:
-        send_message(token, chat, *dispatch_view("n", aid, linkcc))
-    elif len(text) <= 64:
-        text_out, kb = build_search_view(text)
-        send_message(token, chat, text_out, kb)
-    else:
-        send_message(token, chat, "⚠️ 查询词太长了，请发送 App 名称、ID 或 App Store 链接")
+    # 只响应 / 命令,其余文本一律不执行查询
+    send_message(token, chat, "⚙️ 请使用命令操作，发送 /help 查看全部指令")
 
 
 def tg_handle_callback(token, cbq):

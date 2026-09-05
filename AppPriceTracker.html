@@ -343,6 +343,19 @@
   .chk-line input{accent-color:var(--accent)}
   .chk-line.reg-toggle{background:var(--panel2);border:1px solid var(--hair2);
     border-radius:var(--pill);padding:5px 12px;gap:7px;flex-shrink:0}
+  /* 滑动开关（右开左关） */
+  .switch{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0;margin:0}
+  .switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--panel2);
+    border:1px solid var(--border);border-radius:var(--pill);transition:background .2s,border-color .2s}
+  .switch .slider::before{content:"";position:absolute;height:16px;width:16px;left:2px;bottom:2px;
+    background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .switch input:checked + .slider{background:var(--accent);border-color:var(--accent)}
+  .switch input:checked + .slider::before{transform:translateX(18px)}
+  .switch input:focus-visible + .slider{box-shadow:0 0 0 3px var(--accent-soft)}
+  .switch-line{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;
+    color:var(--muted2);cursor:pointer;background:var(--panel2);border:1px solid var(--hair2);
+    border-radius:var(--pill);padding:5px 12px;flex-shrink:0}
   .admin-list{display:flex;flex-direction:column;gap:8px}
   .admin-user-row{display:flex;align-items:center;gap:12px;background:var(--panel);
     border:1px solid var(--hair2);border-radius:14px;padding:10px 12px;
@@ -840,7 +853,7 @@
     <div class="head-row">
       <h3 data-i18n="userMgmt"></h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <label class="chk-line reg-toggle"><input type="checkbox" id="requireApiKey"><span data-i18n="requireApiKey"></span></label>
+        <label class="switch-line"><input type="checkbox" id="requireApiKey" class="switch-input"><span class="switch"><span class="slider"></span></span><span data-i18n="publicApiAccess"></span></label>
         <label class="chk-line reg-toggle"><input type="checkbox" id="allowRegister"><span data-i18n="allowRegister"></span></label>
         <button class="btn ghost sm" id="apiGateAutoBtn" data-i18n="gateAuto"></button>
       </div>
@@ -1147,7 +1160,7 @@ const I18N = {
     badUsername:"用户名需 2-32 位（中英文、数字、下划线、连字符）", regDisabled:"当前未开放注册，请联系管理员",
     userMgmt:"用户", allowRegister:"开放注册", createUser:"创建", roleAdmin:"管理员", roleUser:"普通用户",
     adminAddUser:"添加用户",
-    requireApiKey:"接口需密钥", gateAuto:"自动",
+    publicApiAccess:"公开API访问权限", gateAuto:"自动",
     gateAutoTitle:"恢复自动：本机监听开放，公网/Docker 部署要求登录或密钥",
     apiNeedAuth:"数据接口已开启保护，请先登录",
     resetPwd:"重置密码", newPwdFor:"为 {u} 设置新密码：", confirmDel:"确定删除用户 {u}？",
@@ -1234,7 +1247,7 @@ const I18N = {
     badUsername:"Username: 2-32 chars (letters, digits, underscore, hyphen, CJK)", regDisabled:"Registration is currently closed. Contact the admin.",
     userMgmt:"Users", allowRegister:"Open registration", createUser:"Create", roleAdmin:"Admin", roleUser:"User",
     adminAddUser:"Add user",
-    requireApiKey:"API needs key", gateAuto:"Auto",
+    publicApiAccess:"Public API access", gateAuto:"Auto",
     gateAutoTitle:"Auto: open on loopback, require login or API key otherwise",
     apiNeedAuth:"API is protected — please sign in",
     resetPwd:"Reset password", newPwdFor:"New password for {u}:", confirmDel:"Delete user {u}?",
@@ -1576,7 +1589,7 @@ async function reloadAdmin(){
     const d = await r.json();
     if (!d.ok){ toast(t("needAdmin")); return; }
     $("allowRegister").checked = !!d.allow_register;
-    $("requireApiKey").checked = !!d.require_api_key_effective;
+    $("requireApiKey").checked = !d.require_api_key_effective;
     const dateFmt = ts => ts ? new Date(ts*1000).toLocaleDateString(LANG==="en"?"en-US":"zh-CN") : "";
     const isAdmin = authUser && authUser.role === "admin";
     $("adminUserList").innerHTML = d.users.map(u=>{
@@ -2942,7 +2955,7 @@ $("navAdminBtn").addEventListener("click", openAdmin);
 $("adminClose").addEventListener("click", ()=>$("adminModal").classList.remove("show"));
 $("adminModal").addEventListener("click", e=>{ if(e.target.id==="adminModal") e.target.classList.remove("show"); });
 $("allowRegister").addEventListener("change", e=>adminAction("config/set", { allow_register: e.target.checked }));
-$("requireApiKey").addEventListener("change", e=>adminAction("config/set", { require_api_key: e.target.checked }));
+$("requireApiKey").addEventListener("change", e=>adminAction("config/set", { require_api_key: !e.target.checked }));
 $("apiGateAutoBtn").addEventListener("click", ()=>adminAction("config/set", { require_api_key: "auto" }));
 $("createUserBtn").addEventListener("click", async ()=>{
   const u = $("newUserName").value.trim(), p = $("newUserPass").value, role = $("newUserRole").value;
