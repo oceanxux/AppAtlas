@@ -341,7 +341,7 @@ curl "$BASE/atlas/iap?id=6448311069&country=us" -H "X-API-Key: Atlas_xxx"
 
 ## 📜 License
 
-[MIT](LICENSE) © 2026 paradossio
+MIT © 2026 paradossio
 
 ## 🙏 致谢
 
