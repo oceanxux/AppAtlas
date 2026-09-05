@@ -179,11 +179,10 @@ def tg_build_search_reply(term, cc="us", data=None):
         return (f"🔍 没有找到「{esc(term[:40])}」，试试完整名称、"
                 f"App ID 或直接发 App Store 链接")
     lines = [f"🔍 <b>「{esc(term[:40])}」</b>搜索结果："]
-    for i, r in enumerate(results, 1):
-        lines.append(f"{i}. <b>{esc(r.get('trackName', ''))}</b>"
-                     f" — {esc(str(r.get('formattedPrice', '')))}\n"
-                     f"    ID: <code>{r.get('trackId')}</code>")
-    lines.append("\n👇 点下方按钮直达订阅最低价（也可回复 App ID / 链接）")
+    for r in results:
+        lines.append(f"• <b>{esc(r.get('trackName', ''))}</b>"
+                     f" — {esc(str(r.get('formattedPrice', '')))}")
+    lines.append("\n👇 点下方按钮选择 App")
     return "\n".join(lines)
 
 
@@ -210,7 +209,7 @@ def app_kb(aid, cc=""):
         [{"text": "💰 本体价", "callback_data": cb("b")},
          {"text": "📝 简介", "callback_data": cb("j")},
          {"text": "🆕 更新", "callback_data": cb("g")}],
-        [{"text": "🔗 打开 App Store", "url": apple_link(aid, cc)}],
+        [{"text": f"id{aid} · 在 App Store 打开", "url": apple_link(aid, cc)}],
     ]
 
 
@@ -219,9 +218,8 @@ def tg_build_price_report(aid, cc=""):
     name = _lookup_name(aid)
     regions = [cc.upper()] if cc else config.TG_QUICK_REGIONS
     offers = build_offers_map(aid, regions)
-    link_line = f"\n🔗 <a href=\"{apple_link(aid, cc)}\">id{aid} · 在 App Store 打开</a>"
     if not offers:
-        return f"❌ 未查到 <b>{esc(name)}</b>（ID {aid}）的内购信息\n{link_line}"
+        return f"❌ 未查到 <b>{esc(name)}</b>（ID {aid}）的内购信息"
     rates = fx.get_fx_rates()
 
     def to_cny(price, cur):
@@ -255,7 +253,6 @@ def tg_build_price_report(aid, cc=""):
             seg += f" ≈ ¥{est:.1f}"
         lines.append(seg)
     lines.append(f"\n<i>共 {len(rows)} 项；完整比价请用网页端</i>")
-    lines.append(link_line)
     return "\n".join(lines)
 
 
@@ -278,9 +275,8 @@ def tg_build_base_report(aid, cc=""):
             except (TypeError, ZeroDivisionError):
                 pass
         rows.append((est, rgn, rec.get("formattedPrice") or "—"))
-    link_line = f"\n🔗 <a href=\"{apple_link(aid, cc)}\">id{aid} · 在 App Store 打开</a>"
     if not rows:
-        return f"❌ 未查到 <b>{esc(name)}</b>（ID {aid}）的价格信息\n{link_line}"
+        return f"❌ 未查到 <b>{esc(name)}</b>（ID {aid}）的价格信息"
     rows.sort(key=lambda x: x[0])
     scope = f"{regions[0]} 区" if cc else f"{len(config.TG_QUICK_REGIONS)} 区快查"
     lines = [f"💰 <b>{esc(name)}</b> 本体价格（{scope}）"]
@@ -289,7 +285,6 @@ def tg_build_base_report(aid, cc=""):
         if est != float("inf"):
             seg += f" ≈ ¥{est:.1f}"
         lines.append(seg)
-    lines.append(link_line)
     return "\n".join(lines)
 
 
@@ -299,8 +294,7 @@ def tg_build_desc_report(aid, cc=""):
     if not rec:
         return f"❌ 未查到 ID {aid} 的应用信息"
     lines = [f"📝 <b>{esc(rec.get('trackName', ''))}</b> 简介", "",
-             esc(_trunc(rec.get("description") or "（无简介）", 1000)),
-             f"\n🔗 <a href=\"{apple_link(aid, cc)}\">id{aid} · 在 App Store 打开</a>"]
+             esc(_trunc(rec.get("description") or "（无简介）", 1000))]
     return "\n".join(lines)
 
 
@@ -311,8 +305,7 @@ def tg_build_release_report(aid, cc=""):
         return f"❌ 未查到 ID {aid} 的应用信息"
     lines = [f"🆕 <b>{esc(rec.get('trackName', ''))}</b> 更新说明"
              f"（v{esc(rec.get('version') or '?')}）", "",
-             esc(_trunc(rec.get("releaseNotes") or "（本次更新未提供说明）", 1000)),
-             f"\n🔗 <a href=\"{apple_link(aid, cc)}\">id{aid} · 在 App Store 打开</a>"]
+             esc(_trunc(rec.get("releaseNotes") or "（本次更新未提供说明）", 1000))]
     return "\n".join(lines)
 
 
@@ -334,7 +327,6 @@ def tg_build_info_card(aid, cc=""):
     if rec.get("averageUserRating") is not None:
         lines.append(f"⭐ {rec['averageUserRating']:.1f}（{rec.get('userRatingCount') or 0:,}）")
     lines.append(f"💵 {esc(rec.get('formattedPrice') or '—')}（{(cc or 'us').upper()}）")
-    lines.append(f"\n🔗 <a href=\"{apple_link(aid, cc)}\">id{aid} · 在 App Store 打开</a>")
     return "\n".join(lines)
 
 

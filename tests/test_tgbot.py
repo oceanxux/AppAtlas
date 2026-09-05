@@ -37,8 +37,10 @@ def test_search_reply_lists_ids_and_escapes(tmp_data, monkeypatch):
         {"trackId": 123456, "trackName": "<b>X&D</b>", "formattedPrice": "$0.99"},
     ]}
     out = tgbot.tg_build_search_reply("chatgpt", "us", fake)
-    assert "6448311069" in out and "ChatGPT" in out
+    assert "ChatGPT" in out
+    assert "6448311069" not in out  # 搜索结果不再显示 ID,点按钮即可
     assert "&lt;b&gt;X&amp;D&lt;/b&gt;" in out  # HTML 注入被转义
+    assert "点下方按钮选择" in out
 
 
 def test_search_reply_empty(tmp_data):
@@ -75,7 +77,6 @@ def test_price_report_order_and_escape(tmp_data, monkeypatch):
                         lambda: {"USD": 1.0, "TRY": 40.0, "CNY": 7.0})
     out = tgbot.tg_build_price_report("123")
     assert "MyApp" in out
-    assert "在 App Store 打开" in out  # 带跳转链接
     # 订阅在前、按人民币估价升序:Plus(TR ¥7) → Pro(US ¥693) → 买断最后
     assert out.index("Plus") < out.index("Pro") < out.index("Lifetime")
     assert "40.0 TRY（TR）" in out and "≈ ¥7.0" in out
@@ -88,7 +89,15 @@ def test_price_report_no_offers(tmp_data, monkeypatch):
     monkeypatch.setattr(tgbot, "build_offers_map", lambda aid, regions: {})
     out = tgbot.tg_build_price_report("999")
     assert "未查到" in out
-    assert "在 App Store 打开" in out
+
+
+def test_app_kb_button(tmp_data):
+    kb = tgbot.app_kb("6448311069")
+    flat = [b for row in kb for b in row]
+    url_btn = [b for b in flat if "url" in b]
+    assert url_btn, "应有跳转按钮"
+    assert url_btn[0]["text"] == "id6448311069 · 在 App Store 打开"
+    assert "apps.apple.com" in url_btn[0]["url"]
 
 
 # ---------- 本体 / 简介 / 更新 / 信息卡 ----------
@@ -103,7 +112,6 @@ def test_base_report(tmp_data, monkeypatch):
     out = tgbot.tg_build_base_report("123")
     assert "MyApp" in out and "本体价格" in out
     assert "$9.99" in out and "≈ ¥69.9" in out
-    assert "在 App Store 打开" in out
 
 
 def test_desc_and_release_escape(tmp_data, monkeypatch):
@@ -120,7 +128,6 @@ def test_info_card_empty_fields(tmp_data, monkeypatch):
     monkeypatch.setattr(tgbot, "_lookup_first", lambda aid, cc: {"trackName": "X"})
     out = tgbot.tg_build_info_card("123")
     assert "<b>X</b>" in out
-    assert "在 App Store 打开" in out
 
 
 # ---------- 权限 ----------

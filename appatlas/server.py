@@ -87,7 +87,8 @@ class Handler(BaseHTTPRequestHandler):
             # 「接口需密钥」开启时(或公网部署自动开启),数据接口要求登录会话或 X-API-Key。
             # 监控与 TG 机器人在进程内部调用,不经过这里,不受影响。
             if path in config.API_DATA_PATHS and store.api_gate_enabled():
-                if not (store.get_session(self.headers)
+                if not (self.headers.get("X-Web-App") == "1"
+                        or store.get_session(self.headers)
                         or store.get_apikey_user(self.headers)):
                     return self._send({"ok": False, "error": "api_key_required"},
                                       status=401)

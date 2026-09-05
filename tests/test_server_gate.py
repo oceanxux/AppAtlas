@@ -54,6 +54,24 @@ def test_gate_on_allows_session(server):
     assert status == 200 and body == {"results": [], "resultCount": 0}
 
 
+def test_gate_on_allows_web_app(server):
+    users, meta = store.load_users()
+    meta["require_api_key"] = True
+    store.save_users(users, meta)
+    # 网页请求带内部标记,即使鉴权门开启也放行查价
+    status, body = _get(server, "/api/search?q=", {"X-Web-App": "1"})
+    assert status == 200 and body == {"results": [], "resultCount": 0}
+
+
+def test_gate_on_blocks_anonymous_without_marker(server):
+    users, meta = store.load_users()
+    meta["require_api_key"] = True
+    store.save_users(users, meta)
+    # 无标记、无会话、无密钥 → 仍被拦
+    status, body = _get(server, "/api/search?q=")
+    assert status == 401 and body["error"] == "api_key_required"
+
+
 def test_health_always_open(server):
     status, body = _get(server, "/health")
     assert status == 200 and body["ok"] is True
