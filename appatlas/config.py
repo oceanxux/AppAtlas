@@ -56,10 +56,25 @@ TYPE_LABEL = {"drop": "📉 降价", "raise": "📈 涨价",
 TG_QUICK_REGIONS = ["US", "CN", "TR", "IN", "AR", "PK", "NG", "BR"]
 PERIOD_LABEL = {"ONCE": "买断", "P1W": "周付", "P1M": "月付", "P3M": "季付",
                 "P6M": "半年付", "P1Y": "年付"}
-TG_HELP = ("🤖 <b>App Atlas 查价机器人</b>\n\n"
-           "• 发送 <b>App 名称</b> → 搜索应用\n"
-           "• 发送 <b>App ID</b>（纯数字或 id 开头）→ 各区订阅最低价\n"
-           "• 数据来自本机 AppAtlas 服务，快查 8 区，结果为参考价")
+TG_HELP = (
+    "📱 <b>App Atlas 查价机器人</b>\n\n"
+    "<b>搜索应用</b>\n"
+    "/s ChatGPT\n"
+    "/s us ChatGPT（指定区码搜索）\n"
+    "/s 6448311069 · /s https://apps.apple.com/app/id6448311069\n\n"
+    "<b>查询指令</b>（支持 App ID 或 App Store 链接）\n"
+    "/n 6448311069 — 💎 各区订阅最低价\n"
+    "/b 6448311069 — 💰 本体价格\n"
+    "/j 6448311069 — 📝 应用简介\n"
+    "/g 6448311069 — 🆕 版本更新说明\n\n"
+    "<b>快捷用法</b>\n"
+    "• 指令可加区码：/n tr 6448311069（仅查土耳其）\n"
+    "• 回复任意应用链接/ID 消息 + 指令，可直接调用：回复链接并发 /n\n"
+    "• 直接发 <b>名称</b> 搜索、发 <b>ID/链接</b> 出订阅最低价\n"
+    "• 搜索结果点下方按钮即可选择 App，无需手动输入 ID\n\n"
+    "<i>数据来自本机 App Atlas 服务；订阅/本体默认 8 区快查，"
+    "完整比价请用网页端</i>"
+)
 
 # 需要鉴权的数据接口(受"接口需密钥"开关控制)
 API_DATA_PATHS = ("/api/search", "/api/lookup", "/api/iap", "/api/top", "/api/fx")
