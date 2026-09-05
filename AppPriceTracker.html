@@ -442,7 +442,7 @@
   #navNotifyBtn{position:relative}
   .nav-user-name{font-size:12px;color:var(--text);padding:0 6px 0 8px;max-width:110px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;
-    display:inline-flex;align-items:center}
+    display:inline-flex;align-items:center;cursor:pointer}
   .nav-user-name::before{content:"";display:inline-block;width:7px;height:7px;
     border-radius:50%;background:var(--accent);margin-right:6px;flex-shrink:0}
   @media (max-width:900px){
@@ -579,11 +579,13 @@
     .hero h1{font-size:27px}
     .hero .lead{font-size:14px;line-height:1.6}
     .search-hero{flex-direction:column;gap:10px}
-    .search-hero .btn,.searchbar-compact .btn{width:100%;justify-content:center}
+    .search-hero .btn{width:100%;justify-content:center}
     .search-field input{height:50px;padding:0 16px 0 42px;font-size:16px}
     .search-field .s-ico{left:15px}
-    .searchbar-compact{max-width:none;width:100%}
+    .searchbar-compact{max-width:none;width:100%;gap:8px}
+    .searchbar-compact .search-field{flex:1;min-width:0}
     .searchbar-compact .search-field input{height:46px}
+    .searchbar-compact .btn{flex:0 0 auto;padding:0 16px}
     .container{padding:0 14px}
     .page-head{padding:32px 0 8px}
     .page-head h2{font-size:20px}
@@ -710,7 +712,6 @@
 <div class="view" id="viewSearch">
   <div class="container">
     <div class="page-head">
-      <h2 id="searchPageTitle"></h2>
       <div class="searchbar-compact">
         <div class="search-field">
           <span class="s-ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="#82858d" stroke-width="1.6"/><path d="M10.5 10.5L14 14" stroke="#82858d" stroke-width="1.6" stroke-linecap="round"/></svg></span>
@@ -847,15 +848,49 @@
   </div>
 </div>
 
+<!-- ===== 修改账号(用户名/密码) ===== -->
+<div class="modal-bg" id="accountModal">
+  <div class="modal narrow">
+    <h3 data-i18n="accountTitle"></h3>
+    <div class="field"><span data-i18n="oldPassword"></span>
+      <input id="accOldPass" type="password" autocomplete="current-password"></div>
+    <div class="field"><span data-i18n="newPassword"></span>
+      <input id="accNewPass" type="password" autocomplete="new-password">
+      <div class="hint" data-i18n="pwdHint"></div></div>
+    <div class="form-label" style="margin-top:14px" data-i18n="changeUsername"></div>
+    <div class="field"><span data-i18n="username"></span>
+      <input id="accNewName" autocomplete="username"></div>
+    <div class="login-err" id="accErr"></div>
+    <div class="modal-actions">
+      <button class="btn" id="accCancel" data-i18n="cancel"></button>
+      <button class="btn primary" id="accSave" data-i18n="save"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 重置密码(管理员) ===== -->
+<div class="modal-bg" id="pwdModal">
+  <div class="modal narrow">
+    <h3 id="pwdModalTitle"></h3>
+    <div class="field"><span data-i18n="newPassword"></span>
+      <input id="pwdModalInput" type="password" autocomplete="new-password">
+      <div class="hint" data-i18n="pwdHint"></div></div>
+    <div class="login-err" id="pwdModalErr"></div>
+    <div class="modal-actions">
+      <button class="btn" id="pwdModalCancel" data-i18n="cancel"></button>
+      <button class="btn primary" id="pwdModalOk" data-i18n="save"></button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 用户管理 (仅管理员) ===== -->
 <div class="modal-bg" id="adminModal">
   <div class="modal">
     <div class="head-row">
       <h3 data-i18n="userMgmt"></h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <label class="switch-line"><input type="checkbox" id="requireApiKey" class="switch-input"><span class="switch"><span class="slider"></span></span><span data-i18n="publicApiAccess"></span></label>
-        <label class="chk-line reg-toggle"><input type="checkbox" id="allowRegister"><span data-i18n="allowRegister"></span></label>
-        <button class="btn ghost sm" id="apiGateAutoBtn" data-i18n="gateAuto"></button>
+        <label class="switch-line"><span data-i18n="publicApiAccess"></span><span class="switch"><input type="checkbox" id="requireApiKey"><span class="slider"></span></span></label>
+        <label class="switch-line"><span data-i18n="allowRegister"></span><span class="switch"><input type="checkbox" id="allowRegister"><span class="slider"></span></span></label>
       </div>
     </div>
     <div class="admin-list" id="adminUserList"></div>
@@ -1134,6 +1169,10 @@ const I18N = {
     pickRegions:"选择查询地区", presetCommon:"常用 30 国", presetAll:"全部",
     presetNone:"取消", presetAsia:"亚太", presetEU:"欧洲", presetAmericas:"美洲",
     cancel:"取消", saveAndQuery:"保存并查询", close:"关闭", filterPlaceholder:"筛选…",
+    accountTitle:"修改账号", oldPassword:"当前密码", newPassword:"新密码",
+    pwdHint:"至少 6 位", changeUsername:"修改用户名（留空保持不变）",
+    needOldPwd:"请输入当前密码", nothingChanged:"请填写新密码或新用户名",
+    accountSaved:"账号已更新 ✓", mustChangePwd:"首次登录请修改默认密码",
     period_P1W:"周付", period_P1M:"月付", period_P2M:"双月付", period_P3M:"季付",
     period_P6M:"半年付", period_P1Y:"年付", period_ONCE:"一次性",
     emptyTitle:"发现全球 App Store 最低价",
@@ -1160,8 +1199,7 @@ const I18N = {
     badUsername:"用户名需 2-32 位（中英文、数字、下划线、连字符）", regDisabled:"当前未开放注册，请联系管理员",
     userMgmt:"用户", allowRegister:"开放注册", createUser:"创建", roleAdmin:"管理员", roleUser:"普通用户",
     adminAddUser:"添加用户",
-    publicApiAccess:"公开API访问权限", gateAuto:"自动",
-    gateAutoTitle:"恢复自动：本机监听开放，公网/Docker 部署要求登录或密钥",
+    publicApiAccess:"公开API访问权限",
     apiNeedAuth:"数据接口已开启保护，请先登录",
     resetPwd:"重置密码", newPwdFor:"为 {u} 设置新密码：", confirmDel:"确定删除用户 {u}？",
     usersLoadFail:"加载用户列表失败", needAdmin:"需要管理员权限", opDone:"操作成功 ✓",
@@ -1221,6 +1259,10 @@ const I18N = {
     pickRegions:"Pick query regions", presetCommon:"Top 30", presetAll:"All",
     presetNone:"Clear", presetAsia:"Asia-Pacific", presetEU:"Europe", presetAmericas:"Americas",
     cancel:"Cancel", saveAndQuery:"Save & Query", close:"Close", filterPlaceholder:"Filter…",
+    accountTitle:"Account settings", oldPassword:"Current password", newPassword:"New password",
+    pwdHint:"At least 6 characters", changeUsername:"Change username (leave empty to keep)",
+    needOldPwd:"Current password required", nothingChanged:"Enter a new password or username",
+    accountSaved:"Account updated ✓", mustChangePwd:"Please change the default password first",
     period_P1W:"Weekly", period_P1M:"Monthly", period_P2M:"Bi-monthly", period_P3M:"Quarterly",
     period_P6M:"Semi-annual", period_P1Y:"Yearly", period_ONCE:"One-time",
     emptyTitle:"Find the lowest App Store prices worldwide",
@@ -1247,8 +1289,7 @@ const I18N = {
     badUsername:"Username: 2-32 chars (letters, digits, underscore, hyphen, CJK)", regDisabled:"Registration is currently closed. Contact the admin.",
     userMgmt:"Users", allowRegister:"Open registration", createUser:"Create", roleAdmin:"Admin", roleUser:"User",
     adminAddUser:"Add user",
-    publicApiAccess:"Public API access", gateAuto:"Auto",
-    gateAutoTitle:"Auto: open on loopback, require login or API key otherwise",
+    publicApiAccess:"Public API access",
     apiNeedAuth:"API is protected — please sign in",
     resetPwd:"Reset password", newPwdFor:"New password for {u}:", confirmDel:"Delete user {u}?",
     usersLoadFail:"Failed to load users", needAdmin:"Admin required", opDone:"Done ✓",
@@ -1306,8 +1347,6 @@ function applyI18N(){
     else el.textContent = t(k);
   });
   document.querySelectorAll(".lang-switch button").forEach(b => b.classList.toggle("active", b.dataset.lang === LANG));
-  const gateBtn = document.getElementById("apiGateAutoBtn");
-  if (gateBtn) gateBtn.title = t("gateAutoTitle");
   applyThemeTitle();
   applyAuthMode();
   regionEN = null;
@@ -1494,7 +1533,7 @@ async function initAuth(){
   try{
     const r = await fetch("/api/me", { headers:{ "X-Auth-Token": state.token } });
     const d = await r.json();
-    if (d.ok) authUser = { name:d.username, role:d.role || "user" };
+    if (d.ok) authUser = { name:d.username, role:d.role || "user", mustChange: !!d.must_change };
     else { state.token = null; save(); authUser = null; }
   }catch(e){ authUser = null; }
 }
@@ -1539,6 +1578,7 @@ async function submitAuth(){
       $("loginPass").value = "";
       toast(t(authMode === "register" ? "registered" : "loginOk", {u:authUser.name}));
       updateAuthUI();
+      if (d.must_change){ openAccount(true); }
       if (currentApp && currentMode === "iap" && allOffers.length) renderForOffer();
     } else {
       $("loginErr").textContent = authErrText(d.error);
@@ -1554,6 +1594,51 @@ function doLogout(){
   updateAuthUI();
   multiSelectIds.clear(); updateMultiBar();
   if (currentApp && currentMode === "iap" && allOffers.length) renderForOffer();
+}
+
+/* ===== 修改账号(用户名/密码) ===== */
+let forcePwd = false;
+function openAccount(force){
+  forcePwd = !!force;
+  $("accOldPass").value = ""; $("accNewPass").value = ""; $("accNewName").value = "";
+  $("accErr").textContent = forcePwd ? t("mustChangePwd") : "";
+  $("accCancel").style.display = forcePwd ? "none" : "";
+  $("accountModal").classList.add("show");
+  setTimeout(()=>$("accOldPass").focus(), 60);
+}
+async function submitAccount(){
+  const old = $("accOldPass").value, np = $("accNewPass").value, nn = $("accNewName").value.trim();
+  const err = m => { $("accErr").textContent = m; };
+  if (!old) return err(t("needOldPwd"));
+  if (!np && (!nn || nn === authUser.name)) return err(t("nothingChanged"));
+  if (np && np.length < 6) return err(t("pwdShort"));
+  try{
+    if (np){
+      const d = await postJSON("password", { old_password: old, new_password: np });
+      if (!d.ok) return err(authErrText(d.error));
+    }
+    if (nn && nn !== authUser.name){
+      const d = await postJSON("username", { username: nn, password: old });
+      if (!d.ok) return err(authErrText(d.error));
+      state.token = d.token; save(); authUser.name = nn;
+    }
+    forcePwd = false;
+    $("accountModal").classList.remove("show");
+    toast(t("accountSaved"));
+    updateAuthUI();
+  }catch(e){ err(t("netError")); }
+}
+["accOldPass","accNewPass","accNewName"].forEach(id=>
+  $(id).addEventListener("keydown", e=>{ if(e.key==="Enter") submitAccount(); }));
+
+/* ===== 管理员重置密码弹窗 ===== */
+let pwdModalCb = null;
+function openPwdModal(title, cb){
+  $("pwdModalTitle").textContent = title;
+  $("pwdModalInput").value = ""; $("pwdModalErr").textContent = "";
+  pwdModalCb = cb;
+  $("pwdModal").classList.add("show");
+  setTimeout(()=>$("pwdModalInput").focus(), 60);
 }
 function updateAuthUI(){
   $("navLoginBtn").style.display = authUser ? "none" : "";
@@ -1618,8 +1703,10 @@ async function reloadAdmin(){
     $("adminUserList").querySelectorAll("button[data-pwd]").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const u = btn.dataset.pwd;
-        const np = prompt(t("newPwdFor", {u}));
-        if (np) adminAction("users/set_password", { username:u, password:np });
+        openPwdModal(t("newPwdFor", {u}), np=>{
+          if (!np || np.length < 6){ $("pwdModalErr").textContent = t("pwdShort"); return false; }
+          adminAction("users/set_password", { username:u, password:np });
+        });
       });
     });
   }catch(e){ toast(t("usersLoadFail")); }
@@ -1717,7 +1804,6 @@ function submitSearch(inputId){
 function showSearch(q){
   showView("viewSearch");
   $("searchInputPage").value = q;
-  $("searchPageTitle").textContent = q ? `“${q}”` : t("searchPlaceholder");
   if (q) doSearch(q);
   else $("searchResultsGrid").innerHTML = "";
 }
@@ -2773,13 +2859,31 @@ function showApi(){
   showView("viewApi");
   $("apiOrigin").textContent = location.origin + "/api";
   $("apiDocs").textContent =
-    "# 数据接口示例（全部支持 X-API-Key 头）\n\n" +
+    "# 通用说明\n" +
+    "#  数据接口: /api/search /api/lookup /api/iap /api/top /api/fx\n" +
+    "#  鉴权方式: 请求头 X-API-Key: <你的密钥> (长期脚本推荐)\n" +
+    "#            或 X-Auth-Token: <登录token> (7天有效)\n" +
+    "#  错误格式: {\"ok\":false,\"error\":\"<code>\"}，HTTP 4xx/5xx\n\n" +
+    "# 1) 搜索应用 (q=关键词或App ID; country=区码,默认us)\n" +
     `curl "${location.origin}/api/search?q=chatgpt&country=us" \\\n` +
-    '  -H "X-API-Key: <你的密钥>"\n\n' +
+    '  -H "X-API-Key: <你的密钥>"\n' +
+    '#  → {"results":[{trackId,trackName,artistName,formattedPrice,description,...}]}\n\n' +
+    "# 2) 应用详情与本体价格 (id=App ID; country=区码)\n" +
+    `curl "${location.origin}/api/lookup?id=6448311069&country=us" \\\n` +
+    '  -H "X-API-Key: <你的密钥>"\n' +
+    '#  → results[0]: trackName/formattedPrice/version/trackViewUrl 等\n\n' +
+    "# 3) 内购/订阅价格 (id=App ID; country=区码)\n" +
     `curl "${location.origin}/api/iap?id=6448311069&country=tr" \\\n` +
-    '  -H "X-API-Key: <你的密钥>"\n\n' +
-    `curl "${location.origin}/api/fx"\n\n` +
-    "# 返回字段与文档详见 README.md 的「API 接口」章节";
+    '  -H "X-API-Key: <你的密钥>"\n' +
+    '#  → {"country":"tr","appName":"ChatGPT","iaps":[{iapId,name,\n' +
+    '#      isSubscription,groupName,currencyCode,price,priceFormatted,period}]}\n' +
+    "#  未上架返回 {\"ok\":false,\"reason\":\"not_listed\"}\n\n" +
+    "# 4) 热门订阅App清单\n" +
+    `curl "${location.origin}/api/top" -H "X-API-Key: <你的密钥>"\n` +
+    '#  → {"apps":[{id,name,artist,icon}]}\n\n' +
+    "# 5) 实时汇率 (USD基准,每6小时刷新)\n" +
+    `curl "${location.origin}/api/fx" -H "X-API-Key: <你的密钥>"\n` +
+    '#  → {"base":"USD","rates":{"CNY":7.1,...}}';
   reloadKeys();
 }
 async function reloadKeys(){
@@ -2952,11 +3056,26 @@ $("navLoginBtn").addEventListener("click", ()=>openLogin("login"));
 $("authSwitchLink").addEventListener("click", ()=>openLogin(authMode === "login" ? "register" : "login"));
 $("logoutBtn").addEventListener("click", doLogout);
 $("navAdminBtn").addEventListener("click", openAdmin);
+$("navUser").addEventListener("click", ()=>openAccount(false));
+$("accCancel").addEventListener("click", ()=>$("accountModal").classList.remove("show"));
+$("accSave").addEventListener("click", submitAccount);
+$("accountModal").addEventListener("click", e=>{
+  if (e.target.id === "accountModal"){
+    if (forcePwd){ toast(t("mustChangePwd")); return; }
+    e.target.classList.remove("show");
+  }
+});
+$("pwdModalOk").addEventListener("click", ()=>{
+  if (pwdModalCb && pwdModalCb($("pwdModalInput").value) !== false)
+    $("pwdModal").classList.remove("show");
+});
+$("pwdModalCancel").addEventListener("click", ()=>$("pwdModal").classList.remove("show"));
+$("pwdModalInput").addEventListener("keydown", e=>{ if(e.key==="Enter") $("pwdModalOk").click(); });
+$("pwdModal").addEventListener("click", e=>{ if(e.target.id==="pwdModal") e.target.classList.remove("show"); });
 $("adminClose").addEventListener("click", ()=>$("adminModal").classList.remove("show"));
 $("adminModal").addEventListener("click", e=>{ if(e.target.id==="adminModal") e.target.classList.remove("show"); });
 $("allowRegister").addEventListener("change", e=>adminAction("config/set", { allow_register: e.target.checked }));
 $("requireApiKey").addEventListener("change", e=>adminAction("config/set", { require_api_key: !e.target.checked }));
-$("apiGateAutoBtn").addEventListener("click", ()=>adminAction("config/set", { require_api_key: "auto" }));
 $("createUserBtn").addEventListener("click", async ()=>{
   const u = $("newUserName").value.trim(), p = $("newUserPass").value, role = $("newUserRole").value;
   if (!u || !p) return;
@@ -3073,6 +3192,7 @@ window.addEventListener("hashchange", route);
   updateAuthUI();
   route();
   loadFx();
+  if (authUser && authUser.mustChange) openAccount(true);
 })();
 </script>
 </body>

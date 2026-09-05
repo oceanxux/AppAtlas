@@ -28,6 +28,18 @@ def _get(base, path, headers=None):
         return e.code, json.loads(e.read().decode())
 
 
+def _post(base, path, body, headers=None):
+    req = urllib.request.Request(
+        base + path,
+        data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json", **(headers or {})})
+    try:
+        with urllib.request.urlopen(req, timeout=5) as r:
+            return r.status, json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read().decode())
+
+
 def _login(base):
     req = urllib.request.Request(
         base + "/api/login",
@@ -35,6 +47,38 @@ def _login(base):
         headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=5) as r:
         return json.loads(r.read().decode())["token"]
+
+
+def test_first_login_must_change_flag(server):
+    # 首次创建的 admin 带 must_change 标记
+    token = _login(server)
+    status, me = _get(server, "/api/me", {"X-Auth-Token": token})
+    assert status == 200 and me["must_change"] is True
+    # 改密后解除
+    status, d = _post(server, "/api/password",
+                      {"old_password": "admin123", "new_password": "newpass1"},
+                      {"X-Auth-Token": token})
+    assert status == 200 and d["ok"] is True
+    _, me2 = _get(server, "/api/me", {"X-Auth-Token": token})
+    assert me2["must_change"] is False
+
+
+def test_change_username(server):
+    token = _login(server)
+    status, d = _post(server, "/api/username",
+                      {"username": "boss", "password": "admin123"},
+                      {"X-Auth-Token": token})
+    assert status == 200 and d["ok"] is True and d["username"] == "boss"
+    # 旧 token 已失效(/api/me 始终 200 但 ok:false),新 token 可用
+    _, me_old = _get(server, "/api/me", {"X-Auth-Token": token})
+    assert me_old["ok"] is False
+    _, me = _get(server, "/api/me", {"X-Auth-Token": d["token"]})
+    assert me["ok"] is True and me["username"] == "boss"
+    # 旧密码不配套 → 拒绝改名
+    status, d2 = _post(server, "/api/username",
+                       {"username": "boss2", "password": "wrong"},
+                       {"X-Auth-Token": d["token"]})
+    assert status == 401 and d2["error"] == "bad_credentials"
 
 
 def test_gate_on_blocks_anonymous(server):

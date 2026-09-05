@@ -172,19 +172,14 @@ def apple_link(aid, cc=""):
 # ---------- 回复构建 ----------
 
 def tg_build_search_reply(term, cc="us", data=None):
-    """名称 → 搜索结果文本(与 /api/search 同源同缓存)。"""
+    """名称 → 搜索结果提示文本;结果列表由内联按钮呈现,不再输出文字列表。"""
     if data is None:
         data = _search_cached(term, cc)
     results = (data or {}).get("results") or []
     if not results:
         return (f"🔍 没有找到「{esc(term[:40])}」，试试完整名称、"
                 f"App ID 或直接发 App Store 链接")
-    lines = [f"🔍 <b>「{esc(term[:40])}」</b>搜索结果："]
-    for r in results:
-        lines.append(f"• <b>{esc(r.get('trackName', ''))}</b>"
-                     f" — {esc(str(r.get('formattedPrice', '')))}")
-    lines.append("\n👇 点下方按钮选择 App")
-    return "\n".join(lines)
+    return f"🔍 <b>「{esc(term[:40])}」</b>共 {len(results)} 个结果，点下方按钮选择："
 
 
 def tg_search_keyboard(data):

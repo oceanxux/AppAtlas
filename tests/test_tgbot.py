@@ -31,16 +31,15 @@ def test_extract_id_loose():
 
 # ---------- 搜索结果 ----------
 
-def test_search_reply_lists_ids_and_escapes(tmp_data, monkeypatch):
+def test_search_reply_only_header(tmp_data):
     fake = {"resultCount": 2, "results": [
         {"trackId": 6448311069, "trackName": "ChatGPT", "formattedPrice": "Free"},
         {"trackId": 123456, "trackName": "<b>X&D</b>", "formattedPrice": "$0.99"},
     ]}
     out = tgbot.tg_build_search_reply("chatgpt", "us", fake)
-    assert "ChatGPT" in out
-    assert "6448311069" not in out  # 搜索结果不再显示 ID,点按钮即可
-    assert "&lt;b&gt;X&amp;D&lt;/b&gt;" in out  # HTML 注入被转义
-    assert "点下方按钮选择" in out
+    # 只输出标题提示;结果列表由内联按钮呈现
+    assert "共 2 个结果" in out and "点下方按钮选择" in out
+    assert "ChatGPT" not in out and "X&amp;D" not in out
 
 
 def test_search_reply_empty(tmp_data):

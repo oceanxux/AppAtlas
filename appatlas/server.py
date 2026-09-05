@@ -75,8 +75,11 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/me":
                 info = store.get_session(self.headers)
                 if info:
+                    users, _ = store.load_users()
+                    rec = users.get(info["username"]) or {}
                     return self._send({"ok": True, "username": info["username"],
-                                       "role": info["role"]})
+                                       "role": info["role"],
+                                       "must_change": bool(rec.get("must_change"))})
                 ak = store.get_apikey_user(self.headers)
                 if ak:
                     return self._send({"ok": True, "username": ak,
@@ -268,7 +271,8 @@ class Handler(BaseHTTPRequestHandler):
                            if now - v["ts"] > config.SESSION_TTL]:
                     store.SESSIONS.pop(tk, None)
                 return self._send({"ok": True, "token": token,
-                                   "username": username, "role": rec.get("role", "user")})
+                                   "username": username, "role": rec.get("role", "user"),
+                                   "must_change": bool(rec.get("must_change"))})
             return self._send({"ok": False, "error": "bad_credentials"}, status=401)
 
         if path == "/api/register":
@@ -303,13 +307,37 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send({"ok": False, "error": "password_short"}, status=400)
             with store.USER_LOCK:
                 users, meta = store.load_users()
-                rec = store.check_login(info["username"], str(body.get("old_password", "")))
-                if not rec:
+                if not store.check_login(info["username"], str(body.get("old_password", ""))):
                     return self._send({"ok": False, "error": "bad_credentials"}, status=401)
+                rec = users.get(info["username"]) or {}
                 salt = secrets.token_hex(8)
                 rec["salt"], rec["hash"] = salt, store._hash_password(salt, newpwd)
+                rec["must_change"] = 0  # 改密后解除首登强制
                 store.save_users(users, meta)
             return self._send({"ok": True})
+
+        if path == "/api/username":  # 修改自己的用户名
+            info = store.get_session(self.headers)
+            if not info:
+                return self._send({"ok": False, "error": "unauthorized"}, status=401)
+            newname = str(body.get("username", "")).strip()
+            if not re.fullmatch(r"[\w\u4e00-\u9fa5\-]{2,32}", newname):
+                return self._send({"ok": False, "error": "bad_username"}, status=400)
+            with store.USER_LOCK:
+                users, meta = store.load_users()
+                rec = users.get(info["username"]) or {}
+                if not store.check_login(info["username"], str(body.get("password", ""))):
+                    return self._send({"ok": False, "error": "bad_credentials"}, status=401)
+                if newname != info["username"] and newname in users:
+                    return self._send({"ok": False, "error": "user_exists"}, status=409)
+                users[newname] = users.pop(info["username"])
+                store.save_users(users, meta)
+            role = rec.get("role", "user")
+            # 旧会话按用户名失效,换发新 token 保持登录态
+            store.SESSIONS.pop(self.headers.get("X-Auth-Token", ""), None)
+            token = store.issue_token(newname)
+            return self._send({"ok": True, "token": token,
+                               "username": newname, "role": role})
 
         # ---- 以下需要管理员 ----
         if path in ("/api/users/create", "/api/users/set_role", "/api/users/delete",

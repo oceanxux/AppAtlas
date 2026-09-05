@@ -45,7 +45,8 @@ def load_users():
         salt = secrets.token_hex(8)
         pw = os.environ.get("APT_ADMIN_PASSWORD", "admin123")
         users = {"admin": {"salt": salt, "hash": _hash_password(salt, pw),
-                           "role": "admin", "created_at": int(time.time())}}
+                           "role": "admin", "created_at": int(time.time()),
+                           "must_change": 1}}
         save_users(users, {"allow_register": True})
         hint = "APT_ADMIN_PASSWORD 环境变量的值" if os.environ.get("APT_ADMIN_PASSWORD") \
             else "admin123(登录后请在「用户管理」中修改,或设置 APT_ADMIN_PASSWORD 后删除 users.json 重新生成)"
@@ -66,7 +67,8 @@ def load_users():
         rec.setdefault("role", "admin" if name == "admin" else "user")
         rec.setdefault("api_keys", [])
         rec.setdefault("watches", [])
-        rec.setdefault("channels", {})
+        rec.setdefault("channels", [])
+        rec.setdefault("must_change", 0)
         if rec.get("tg"):  # 旧版单 TG 配置迁移到 channels
             rec["channels"].setdefault("tg", rec.pop("tg"))
     return users, meta
