@@ -20,36 +20,6 @@
 - 🔑 **账号系统**：注册 / 登录 / 管理员，支持 API 密钥与「公开API访问权限」开关
 - 🌙 深色模式 + 中英双语 UI + CSV 导出 + 实时汇率
 
-## 🚀 快速开始
-
-### 前置要求
-
-- **Python 3.9+**（仅用标准库，无需 `pip install` 任何东西）
-  - macOS：终端 `python3 --version`（系统通常自带）
-  - Windows：[python.org](https://www.python.org/downloads/) 下载安装，务必勾选 ✅ **Add Python to PATH**
-
-### macOS
-
-1. 下载本仓库 ZIP（`Code` → `Download ZIP`），解压
-2. 进入文件夹，终端运行：
-   ```bash
-   python3 AppPriceTracker.py
-   ```
-3. 浏览器自动打开 `http://localhost:8765`
-4. 关闭：在终端窗口按 **Ctrl+C**
-
-### Windows
-
-1. 下载并解压本仓库 ZIP
-2. 在文件夹里打开 cmd，运行：
-   ```bat
-   python AppPriceTracker.py
-   ```
-3. 浏览器自动打开
-4. 关闭：直接关掉 cmd 窗口
-
-> 想要双击启动可自建 `.command` / `.bat` 脚本（各 3 行，调用上面的命令即可），此类本地工具不入库。
-
 ## 🐳 Docker 部署
 
 镜像由 GitHub Actions 自动构建并发布：`ghcr.io/oceanxux/appatlas:latest`（amd64 + arm64 双架构），服务器部署**无需克隆仓库**：
@@ -320,8 +290,6 @@ curl "$BASE/atlas/iap?id=6448311069&country=us" -H "X-API-Key: Atlas_xxx"
 **Q: 端口被占用？** 设环境变量 `PORT=8766`，或改 `AppPriceTracker.py` 顶部的默认值。
 
 **Q: 公司网络拦截了某个 API？** 看启动窗口报错。若 `apps.apple.com` 被拦，订阅查询会失败但应用本身价格仍可用。
-
-**Q: macOS 提示"未签名"？** 右键文件 → 打开 → 安全提示里点"打开"。本项目本地运行，请放心。
 
 **Q: 换 App 之后查询很慢？** 正常。30 国 × 1 次 API 调用，并发 5 路约 8-15 秒。
 
