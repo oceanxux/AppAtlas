@@ -64,6 +64,7 @@ TG_COMMANDS = [
     {"command": "b", "description": "本体买断价格"},
     {"command": "j", "description": "应用简介"},
     {"command": "g", "description": "版本更新说明"},
+    {"command": "id", "description": "查看当前会话 ID"},
     {"command": "help", "description": "使用说明"},
 ]
 TG_HELP = (
@@ -81,12 +82,14 @@ TG_HELP = (
     "<b>快捷用法</b>\n"
     "• 指令可加区码：/n tr 6448311069（仅查土耳其）\n"
     "• 回复任意应用链接/ID 消息 + 指令，可直接调用：回复链接并发 /n\n"
-    "• 搜索结果点下方按钮即可选择 App，无需手动输入 ID\n\n"
+    "• 搜索结果点下方按钮即可选择 App，无需手动输入 ID\n"
+    "• 👥 <b>群组可用</b>：把机器人拉进 Telegram 群，群成员发指令即可查询\n"
+    "   发 <b>/id</b> 获取群 ID，填到网页「监控通知」页可限定仅该群可用\n\n"
     "<i>数据来自本机 App Atlas 服务；订阅/本体默认 8 区快查，"
     "完整比价请用网页端</i>"
 )
 
 # 需要鉴权的数据接口(受"接口需密钥"开关控制)
-API_DATA_PATHS = ("/api/search", "/api/lookup", "/api/iap", "/api/top", "/api/fx")
+API_DATA_PATHS = ("/atlas/search", "/atlas/lookup", "/atlas/iap", "/atlas/top", "/atlas/fx")
 # 始终开放:页面本体、健康检查、登录态查询
-API_OPEN_PATHS = ("/", "/index.html", "/health", "/api/me")
+API_OPEN_PATHS = ("/", "/index.html", "/health", "/atlas/me")

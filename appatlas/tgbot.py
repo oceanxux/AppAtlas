@@ -70,6 +70,27 @@ def tg_allowed_chat(users):
     return ""
 
 
+def tg_chat_allowed(users, chat):
+    """会话权限:
+    - 群聊:若配置了群组 ID(group_id)则仅该群可用;未配置则任何机器人所在的群都可用
+    - 私聊:仅限绑定的 chat_id,未绑定则开放"""
+    chat = chat or {}
+    if ((chat.get("type") or "")) in ("group", "supergroup"):
+        group_id = _tg_group_id(users)
+        return not group_id or str(chat.get("id", "")) == group_id
+    allow = tg_allowed_chat(users)
+    return not allow or str(chat.get("id", "")) == allow
+
+
+def _tg_group_id(users):
+    """返回配置的群组 ID(可选,用于把使用范围限定到一个群);未配置返回 ""。"""
+    for rec in users.values():
+        tg = (rec.get("channels") or {}).get("tg") or {}
+        if tg.get("bot_token") and tg.get("group_id"):
+            return str(tg["group_id"])
+    return ""
+
+
 # ---------- 解析 ----------
 
 def esc(s):
@@ -375,10 +396,17 @@ def tg_handle_message(token, msg):
     if not text or not chat:
         return
     users, _ = store.load_users()
-    allow = tg_allowed_chat(users)
-    if allow and chat != allow:
-        return  # 未绑定的会话,忽略
+    if not tg_chat_allowed(users, msg.get("chat") or {}):
+        return  # 未绑定的私聊,忽略(群聊放行)
     if text.startswith("/"):
+        cmd = text.split()[0].split("@")[0].lower()
+        if cmd == "/id":
+            ctype = (msg.get("chat") or {}).get("type") or "private"
+            hint = ("（这是群组 ID，填入「监控通知」页的群组 ID 框，"
+                    "可把机器人限定为仅本群可用）" if ctype in ("group", "supergroup")
+                    else "（这是你的私聊 ID）")
+            return send_message(token, chat,
+                                f"🆔 当前会话 ID：<code>{html.escape(chat)}</code>\n{hint}")
         reply = ((msg.get("reply_to_message") or {}).get("text") or "").strip()
         return tg_handle_command(token, chat, text, reply)
     # 只响应 / 命令,其余文本一律不执行查询
@@ -393,8 +421,7 @@ def tg_handle_callback(token, cbq):
     if not data or not chat:
         return
     users, _ = store.load_users()
-    allow = tg_allowed_chat(users)
-    if allow and chat != allow:
+    if not tg_chat_allowed(users, msg.get("chat") or {}):
         return
     tg_call(token, "answerCallbackQuery", {"callback_query_id": cbq.get("id")}, timeout=8)
     parts = data.split(":")

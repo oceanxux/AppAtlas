@@ -17,7 +17,7 @@
 - ⚖️ **多 App 横评**：监控列表多选，跨 App 跨国大表（ChatGPT vs YouTube vs Notion）
 - 🔔 **价格监控**：定时比对报价，降价/涨价/新增/移除套餐自动推送
 - 🤖 **Telegram 查价机器人**：发名称出搜索、发 ID/链接出各区最低价，支持 `/s /b /n /j /g` 指令与内联按钮点选（见下方专节）
-- 🔑 **账号系统**：注册 / 登录 / 管理员，支持 API 密钥与接口鉴权门
+- 🔑 **账号系统**：注册 / 登录 / 管理员，支持 API 密钥与「公开API访问权限」开关
 - 🌙 深色模式 + 中英双语 UI + CSV 导出 + 实时汇率
 
 ## 🚀 快速开始
@@ -86,15 +86,16 @@ docker compose up -d --build
 ## 👤 账号系统
 
 - **注册 / 登录**：默认开放注册；登录后解锁监控列表、家族大表、多 App 对比、历史走势与 CSV 导出
+- **首登强制改密**：使用默认密码 `admin123` 首次登录时，会强制弹出修改密码窗口（改完一次后永久解除）；点右上角用户名旁的用户面板里的「修改账户密码」可随时修改密码与用户名
 - **默认管理员** `admin / admin123`（首次启动自动创建 `users.json`，可用环境变量 `APT_ADMIN_PASSWORD` 覆盖）
-- **管理员**可在右上角「用户」面板：授管理员、重置密码、删号、开关注册、配置接口鉴权门
+- **管理员**可在右上角「用户」面板：授管理员、重置密码、删号、开关注册、配置「公开API访问权限」
 
 ## 🤖 Telegram 机器人使用
 
 App Atlas 内置两个 Telegram 能力，**共用同一个 Bot Token**：
 
 1. **价格监控推送** —— 监控的 App 价格变动时，主动推消息给你
-2. **查价机器人** —— 你主动给机器人发 App 名称 / ID，它回你价格
+2. **查价机器人** —— 通过 `/` 指令查询：搜索、订阅最低价、本体价、简介、更新说明
 
 ### 第 1 步：创建机器人（拿 Token）
 
@@ -121,17 +122,17 @@ App Atlas 内置两个 Telegram 能力，**共用同一个 Bot Token**：
 ### 第 3 步：在 App Atlas 里配置
 
 1. 登录后，点击右上角 **「监控通知」** 页
-2. 在 **Telegram** 渠道中填入 **Bot Token** 与 **Chat ID**
-3. 点 **保存**，再点 **测试**，收到测试消息即配置成功
+2. 点击 **Telegram** 渠道卡片，在弹窗中填入 **Bot Token** 与 **Chat ID**（群组 ID 可选）
+3. 点 **保存**；回到卡片点「测试」（或弹窗内左下角「测试」），收到测试消息即配置成功
 
-保存后约 **30 秒**，查价机器人自动上线。
+保存后约 **30 秒**，查价机器人自动上线，并主动推送一条使用说明到绑定的会话。
 
 ### 第 4 步：使用查价机器人
 
-**搜索应用** —— 发 App 名称即可，结果带的按钮**直接点选**，无需手动输入 ID：
+机器人**仅通过 `/` 命令操作**（直接发其他文本不会触发查询）。输入 `/` 会弹出命令菜单：
 
 ```
-/s ChatGPT             搜索应用（可加区码：/s us ChatGPT）
+/s ChatGPT             搜索应用，结果以按钮呈现，点选即查（可加区码：/s us ChatGPT）
 ```
 
 **查询指令**（均支持 App ID 或 App Store 链接，可加区码查单地区）：
@@ -146,20 +147,17 @@ App Atlas 内置两个 Telegram 能力，**共用同一个 Bot Token**：
 
 **快捷用法**：
 
-- 直接发 **App 名称** → 搜索；发 **App ID 或 App Store 链接** → 订阅最低价
+- 搜索结果以**内联按钮**呈现，点选即查（点选 = 查订阅最低价），无需手动输入 ID
 - **回复**任意含应用链接/ID 的消息并带指令，可直接调用：回复链接并发 `/n`
-- 搜索结果点下方按钮选择 App（点选 = 查订阅最低价）
-- 所有查询结果末尾附带 **「🔗 打开 App Store」跳转链接**，以及订阅/本体/简介/更新四个后续操作按钮
+- 所有查询结果下方附带「订阅最低价 / 本体价 / 简介 / 更新」按钮和 **App Store 跳转链接**
+- `/id` —— 查看当前会话 ID（私聊回你的 Chat ID，群里回群组 ID）
 
-### 会话权限（重要）
+### 群组使用与会话权限（重要）
 
-- 配置了 **Chat ID** 时：机器人**只响应那个 Chat** 的消息，其他人发消息会被忽略（推荐）；绑定成功后会收到一条使用说明
-- 未配置 Chat ID 时：任何给这个机器人发消息的人都能查价。**公网部署且在意消耗时，务必填 Chat ID**
-
-### 会话权限（重要）
-
-- 配置了 **Chat ID** 时：机器人**只响应那个 Chat** 的消息，其他人发消息会被忽略（推荐）
-- 未配置 Chat ID 时：任何给这个机器人发消息的人都能查价。**公网部署且在意消耗时，务必填 Chat ID**
+- **群组可用**：把机器人拉进 Telegram 群，**群成员发指令即可查询**（包括点搜索按钮）
+- **群组 ID（可选限定）**：默认任何机器人所在的群都可用；若只想允许自己的群，在群里发 `/id` 拿到群组 ID，填入「监控通知」页 Telegram 渠道的「群组 ID」框保存即可，其他群将被忽略
+- **私聊**：仅限绑定的 **Chat ID**（即你自己），陌生人私聊会被忽略；未配置 Chat ID 时私聊对所有人开放
+- 首次绑定成功后，机器人会主动推送一条使用说明
 
 ## 🔔 价格监控与推送渠道
 
@@ -167,27 +165,27 @@ App Atlas 内置两个 Telegram 能力，**共用同一个 Bot Token**：
 
 - **触发条件**：降价 / 涨价 / 新增套餐 / 移除套餐（可限定套餐与区域）
 - **轮询间隔**：`MONITOR_HOURS` 环境变量，默认 6 小时
-- **推送渠道**（「监控通知」页配置，可同时启用多个）：
-  - **Telegram** —— `bot_token` + `chat_id`（与查价机器人共用）
+- **推送渠道**（「监控通知」页点渠道卡片 → 弹窗配置，可同时启用多个）：
+  - **Telegram** —— `bot_token` + `chat_id`（+ 可选 `group_id` 限定群组；与查价机器人共用）
   - **Bark（iOS）** —— `device_key`（+ 可选自建 `server`，默认官方 `api.day.app`）
-  - **HTTP Webhook** —— 任意 `url`，收到 `{"app","events":[...]}` JSON POST
+  - **HTTP Webhook** —— `name` + 任意 `url`，价格变动时收到 `{"app","events":[...]}` JSON POST
 
 ## 🔌 API 接口
 
-Base URL：`http://127.0.0.1:8765`。登录后调用受保护接口带请求头 `X-Auth-Token: <token>`；数据类接口也可改用 `X-API-Key`（网页「API」页创建，形如 `atlas_live_...`）。
+Base URL：`http://127.0.0.1:8765`。登录后调用受保护接口带请求头 `X-Auth-Token: <token>`；数据类接口也可改用 `X-API-Key`（网页「API」页创建，形如 `Atlas_...`）。
 
 ### 数据接口
 
 | 方法 | 路径 | 参数 | 说明 |
 |---|---|---|---|
-| GET | `/api/search` | `q` 关键词/App ID/链接；`country` 区码（默认 us） | 搜索应用（含 `description` 简介）|
-| GET | `/api/lookup` | `id` App ID；`country` 区码 | 应用信息与买断价 |
-| GET | `/api/iap` | `id` App ID；`country` 区码 | 内购/订阅价格（未上架返回 `{"ok":false,"reason":"not_listed"}`）|
-| GET | `/api/top` | 无 | 首页「热门订阅 App」清单 |
-| GET | `/api/fx` | 无 | 实时汇率（USD 基准）|
+| GET | `/atlas/search` | `q` 关键词/App ID/链接；`country` 区码（默认 us） | 搜索应用（含 `description` 简介）|
+| GET | `/atlas/lookup` | `id` App ID；`country` 区码 | 应用信息与买断价 |
+| GET | `/atlas/iap` | `id` App ID；`country` 区码 | 内购/订阅价格（未上架返回 `{"ok":false,"reason":"not_listed"}`）|
+| GET | `/atlas/top` | 无 | 首页「热门订阅 App」清单 |
+| GET | `/atlas/fx` | 无 | 实时汇率（USD 基准）|
 | GET | `/health` | 无 | 健康检查 `{"ok":true,"ts":...}` |
 
-`/api/iap` 返回结构（节选）：
+`/atlas/iap` 返回结构（节选）：
 
 ```json
 {
@@ -204,11 +202,12 @@ Base URL：`http://127.0.0.1:8765`。登录后调用受保护接口带请求头 
 
 | 方法 | 路径 | Body (JSON) | 说明 |
 |---|---|---|---|
-| POST | `/api/login` | `{"username","password"}` | 登录，返回 `token`、`role` |
-| POST | `/api/register` | `{"username","password"}` | 注册并自动登录（用户名 2-32 位，密码 ≥6 位）|
-| POST | `/api/logout` | - | 登出（服务端销毁会话）|
-| POST | `/api/password` | `{"old_password","new_password"}` | 修改自己的密码 |
-| GET | `/api/me` | - | 当前登录态 |
+| POST | `/atlas/login` | `{"username","password"}` | 登录，返回 `token`、`role` |
+| POST | `/atlas/register` | `{"username","password"}` | 注册并自动登录（用户名 2-32 位，密码 ≥6 位）|
+| POST | `/atlas/logout` | - | 登出（服务端销毁会话）|
+| POST | `/atlas/password` | `{"old_password","new_password"}` | 修改自己的密码（成功后解除首登强制标记）|
+| POST | `/atlas/username` | `{"username","password"}` | 修改自己的用户名（需当前密码验证），返回新 token |
+| GET | `/atlas/me` | - | 当前登录态（含 `must_change` 首登标记）|
 
 token 有效期 7 天（内存态，服务重启后需重新登录）。
 
@@ -216,26 +215,33 @@ token 有效期 7 天（内存态，服务重启后需重新登录）。
 
 | 方法 | 路径 | Body (JSON) | 说明 |
 |---|---|---|---|
-| GET / POST | `/api/watch` / `/api/watch/save` / `/api/watch/delete` | `{"app_id","name","icon","triggers","offers","regions"}` | 监控列表增删查 |
-| GET | `/api/notifications` | - | 最近 100 条价格变动事件 |
-| GET / POST | `/api/channels` / `/api/channels/save` / `/api/channels/test` | `{"type","config"}` | 推送渠道：`tg`→`{"bot_token","chat_id"}`；`bark`→`{"device_key","server"}`；`http`→`{"url"}` |
-| GET / POST | `/api/keys` / `/api/keys/create` / `/api/keys/delete` | `{"name"}` / `{"id"}` | API 密钥管理 |
+| GET / POST | `/atlas/watch` / `/atlas/watch/save` / `/atlas/watch/delete` | `{"app_id","name","icon","triggers","offers","regions"}` | 监控列表增删查 |
+| GET | `/atlas/notifications` | - | 最近 100 条价格变动事件 |
+| GET / POST | `/atlas/channels` / `/atlas/channels/save` / `/atlas/channels/test` | `{"type","config"}` | 推送渠道：`tg`→`{"bot_token","chat_id","group_id"}`；`bark`→`{"device_key","server"}`；`http`→`{"name","url"}` |
+| GET / POST | `/atlas/keys` / `/atlas/keys/create` / `/atlas/keys/delete` | `{"name"}` / `{"id"}` | API 密钥管理 |
 
 ### 管理员接口（请求头需管理员 token）
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/users` | 用户列表 + 注册/鉴权门开关状态 |
-| POST | `/api/users/create` / `set_role` / `delete` / `set_password` | 用户管理 |
-| POST | `/api/config/set` | `{"allow_register":true}` 开放注册；`{"require_api_key":true\|false\|"auto"}` 接口鉴权门 |
+| GET | `/atlas/users` | 用户列表 + 注册开关与「公开API访问权限」当前状态 |
+| POST | `/atlas/users/create` / `set_role` / `delete` / `set_password` | 用户管理 |
+| POST | `/atlas/config/set` | `{"allow_register":true}` 开放注册；`{"require_api_key":true\|false\|"auto"}` 公开API访问权限 |
 
-### 接口鉴权门
+### 「公开API访问权限」详解
 
-数据接口（search / lookup / iap / top / fx）的开放程度由「用户」面板的『接口需密钥』开关控制：
+「用户」面板里有一个滑动开关**「公开API访问权限」**，它只管一件事：**外部脚本不经登录能不能直接调数据接口**（`/atlas/search`、`/atlas/lookup`、`/atlas/iap`、`/atlas/top`、`/atlas/fx`）。
 
-- **自动（默认）**：监听 `127.0.0.1` 时开放（本机自用零门槛）；`HOST=0.0.0.0` 或 Docker 公网部署时自动要求登录会话或 `X-API-Key`
-- **手动覆盖**：面板勾选 = 强制要求，取消 = 强制开放，「自动」恢复默认
-- 被拦截时返回 `401 {"ok":false,"error":"api_key_required"}`
+| 开关状态 | 网页浏览/搜索/查价 | 外部脚本调接口 |
+|---|---|---|
+| **开（公开）** | ✅ 免登录 | ✅ 免登录（任何人可调）|
+| **关（默认，私有）** | ✅ 免登录 | ❌ 需 `X-Auth-Token` 或 `X-API-Key` |
+
+- **网页端永远免登录**：前端请求自带内部标记（`X-Web-App: 1`），开关无论怎么拨都不影响浏览器里的搜索与查价——这个开关拦的是**程序化调用**（curl、脚本、第三方工具）
+- **默认为关**：即「脚本 API 需登录/密钥」，防止公网部署时接口流量被白嫖
+- 首次部署且未手动拨动过开关时为「自动」策略：本机监听（`127.0.0.1`）开放，公网/Docker（`0.0.0.0`）自动要求鉴权；一旦在面板上拨动开关，就固定为开/关
+- 被拦截的脚本请求返回 `401 {"ok":false,"error":"api_key_required"}`；`/health`、页面本体、`/atlas/me` 始终开放；监控任务与 TG 机器人在进程内部调用，不受影响
+- ⚠️ 说明：网页标记是软性区分（抓包可见），用于挡住普遍的脚本白嫖，不是安全边界；若要严格限制，请配合反代鉴权或防火墙
 
 ### 调用示例
 
@@ -243,20 +249,20 @@ token 有效期 7 天（内存态，服务重启后需重新登录）。
 BASE=http://127.0.0.1:8765
 
 # 搜索应用
-curl "$BASE/api/search?q=chatgpt&country=us"
+curl "$BASE/atlas/search?q=chatgpt&country=us"
 
 # 查询 ChatGPT 在土耳其的内购价格
-curl "$BASE/api/iap?id=6448311069&country=tr"
+curl "$BASE/atlas/iap?id=6448311069&country=tr"
 
 # 登录拿 token
-TOKEN=$(curl -s -X POST $BASE/api/login -H 'Content-Type: application/json' \
+TOKEN=$(curl -s -X POST $BASE/atlas/login -H 'Content-Type: application/json' \
   -d '{"username":"admin","password":"admin123"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['token'])")
 
 # 带 token 查用户列表（管理员）
-curl "$BASE/api/users" -H "X-Auth-Token: $TOKEN"
+curl "$BASE/atlas/users" -H "X-Auth-Token: $TOKEN"
 
 # 或改用 API 密钥（网页「API」页创建，适合长期脚本）
-curl "$BASE/api/iap?id=6448311069&country=us" -H "X-API-Key: atlas_live_xxx"
+curl "$BASE/atlas/iap?id=6448311069&country=us" -H "X-API-Key: Atlas_xxx"
 ```
 
 错误格式统一为 `{"ok":false,"error":"<code>"}`，常见 code：`bad_credentials`、`user_exists`、`password_short`、`register_disabled`、`cannot_modify_self`、`last_admin`、`api_key_required`。
@@ -266,7 +272,7 @@ curl "$BASE/api/iap?id=6448311069&country=us" -H "X-API-Key: atlas_live_xxx"
 | 变量 | 默认 | 说明 |
 |---|---|---|
 | `PORT` | `8765` | 监听端口 |
-| `HOST` | `127.0.0.1` | 监听地址（Docker 内 `0.0.0.0`；非回环地址会自动开启鉴权门）|
+| `HOST` | `127.0.0.1` | 监听地址（Docker 内 `0.0.0.0`；未手动设置开关时，非回环地址自动要求接口鉴权）|
 | `APT_DATA_DIR` | 脚本所在目录 | 账号 / 缓存 / 监控数据目录（Docker 挂卷用）|
 | `APT_ADMIN_PASSWORD` | 无 | 首次创建 users.json 时 admin 的密码 |
 | `NO_BROWSER` | 无 | 设为 `1` 不自动打开浏览器 |
@@ -286,7 +292,7 @@ curl "$BASE/api/iap?id=6448311069&country=us" -H "X-API-Key: atlas_live_xxx"
 浏览器 (UI) ←→ http://localhost:8765 (Python 后端) ←→ Apple APIs
                     │
                     ├─ monitor：定时比对监控 App 报价 → TG/Bark/Webhook 推送
-                    └─ tgbot：Telegram 查价机器人（发名称出搜索，发 ID 出各区最低价）
+                    └─ tgbot：Telegram 查价机器人（/s /n /b /j /g 指令 + 按钮点选，支持群组）
 ```
 
 后端为 `appatlas/` 包（`server` 路由 · `store` 用户/鉴权 · `apple` 苹果接口 · `monitor` 监控 · `tgbot` 机器人 · `fx` 汇率 · `notify` 推送 · `cache` 缓存 · `config` 配置），全部标准库；前端为单文件 HTML + JS（无外部库依赖）。
@@ -298,17 +304,9 @@ curl "$BASE/api/iap?id=6448311069&country=us" -H "X-API-Key: atlas_live_xxx"
 | `AppPriceTracker.py` | 一键启动入口（薄封装，调用 `appatlas.server.main`）|
 | `appatlas/` | 后端包（9 个模块，纯标准库）|
 | `AppPriceTracker.html` | 前端（单文件 HTML+JS，深色模式自适应）|
-| `tests/` | pytest 测试（鉴权门 / 用户存储 / 监控差分 / TG 回复）|
-| `requirements.txt` | 运行时零依赖；仅列出开发用 pytest |
+| `requirements.txt` | 运行时零依赖；仅列出开发用工具 |
 | `Dockerfile` / `docker-compose.yml` | Docker 部署（含日志轮转上限）|
 | `.github/workflows/docker.yml` | GitHub Actions 自动构建镜像（amd64 + arm64）|
-
-开发 & 测试：
-
-```bash
-python3 -m venv .venv && .venv/bin/pip install pytest
-.venv/bin/python -m pytest tests/ -q
-```
 
 ## ⚠️ 注意事项
 
@@ -327,7 +325,9 @@ python3 -m venv .venv && .venv/bin/pip install pytest
 
 **Q: 换 App 之后查询很慢？** 正常。30 国 × 1 次 API 调用，并发 5 路约 8-15 秒。
 
-**Q: Telegram 机器人不回复？** 确认 Bot Token 填对、已保存，保存后等 ~30 秒；填了 Chat ID 的话，确认发消息的就是那个 Chat。
+**Q: Telegram 机器人不回复？** 确认 Bot Token 填对、已保存，保存后等 ~30 秒；填了 Chat ID 的话，确认发消息的就是那个 Chat（或在该群内）；机器人只响应 `/` 命令。
+
+**Q: 机器人只能在私聊用吗？** 不是，把机器人拉进群即可让群成员共用；在群里发 `/id` 获取群组 ID 并填入配置，可进一步限定仅该群可用。
 
 ## 🎯 推荐试用
 

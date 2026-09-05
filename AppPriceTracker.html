@@ -82,6 +82,7 @@
     box-shadow:0 2px 10px rgba(79,70,229,.3)}
   .btn.primary:hover{background:linear-gradient(180deg,#4f47e8,#4338ca)}
   .btn.ghost{background:transparent;border-color:transparent;color:var(--muted2)}
+  .btn.soft{background:var(--accent-soft);border-color:transparent;color:var(--accent);font-weight:600}
   .btn.ghost:hover{background:var(--panel2);color:var(--text)}
   .btn.sm{height:30px;padding:0 12px;font-size:12px}
   .btn:focus-visible{box-shadow:0 0 0 3px var(--accent-soft);outline:none}
@@ -444,7 +445,9 @@
   #navNotifyBtn{position:relative}
   .nav-user-name{font-size:12px;color:var(--text);padding:0 6px 0 8px;max-width:110px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;
-    display:inline-flex;align-items:center;cursor:pointer}
+    display:inline-flex;align-items:center}
+  .nav-user-name svg{width:12px;height:12px;margin-right:5px;flex-shrink:0;color:var(--accent)}
+  .nav-user-name svg.usr{color:var(--muted2)}
   .nav-user-name::before{content:"";display:inline-block;width:7px;height:7px;
     border-radius:50%;background:var(--accent);margin-right:6px;flex-shrink:0}
   @media (max-width:900px){
@@ -486,6 +489,18 @@
     font-family:inherit;outline:none;transition:border-color .15s}
   .ch-form input:focus{border-color:var(--accent)}
   .ch-form input::placeholder{color:var(--muted)}
+  .ch-btns{display:inline-flex;gap:8px;flex:0 0 auto}
+  .ch-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ch-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--pill)}
+  .ch-badge.ok{background:var(--green-bg);color:var(--green)}
+  .ch-badge.off{background:var(--panel2);color:var(--muted)}
+  .ch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .ch-pick-card{border:1.5px solid var(--hair2);border-radius:14px;padding:16px 6px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--panel);transition:all .15s}
+  .ch-pick-card:hover{border-color:var(--border)}
+  .ch-pick-card.active{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .ch-pick-ico{width:34px;height:34px;display:flex;align-items:center;justify-content:center}
+  .ch-pick-ico svg,.ch-pick-ico img{width:100%;height:100%;display:block}
   @media (max-width:760px){
     .ch-row{flex-direction:column;align-items:stretch}
     .ch-ident{flex:none}
@@ -527,7 +542,13 @@
 
   /* ===== API 接入 / 通知 页 ===== */
   .narrow-page{max-width:860px}
-  .panel-card{background:var(--panel);border:1px solid var(--hair2);border-radius:16px;padding:16px 18px}
+  .page-icon{width:54px;height:54px;border-radius:17px;background:var(--accent-soft);
+    color:var(--accent);display:inline-flex;align-items:center;justify-content:center;
+    margin-bottom:14px;box-shadow:var(--shadow-sm)}
+  .page-icon svg{width:26px;height:26px}
+  .page-head .page-sub{margin-top:-12px}
+  .panel-card{background:var(--panel);border:1px solid var(--hair2);border-radius:16px;
+    padding:16px 18px;box-shadow:var(--shadow-sm)}
   .api-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .api-k{font-size:12.5px;color:var(--muted);font-weight:500}
   .api-url{flex:1;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--text);
@@ -1020,7 +1041,11 @@
 <!-- ===== API 接入 ===== -->
 <div class="view" id="viewApi">
   <div class="container narrow-page">
-    <div class="page-head"><h2 data-i18n="apiTitle"></h2></div>
+    <div class="page-head">
+      <div class="page-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+      <h2 data-i18n="apiTitle"></h2>
+      <p class="page-sub" data-i18n="apiSub"></p>
+    </div>
     <div class="panel-card">
       <div class="api-row"><span class="api-k" data-i18n="apiAddr"></span><code class="api-url" id="apiOrigin"></code></div>
     </div>
@@ -1041,55 +1066,27 @@
 <div class="view" id="viewNotify">
   <div class="container narrow-page">
     <div class="page-head">
+      <div class="page-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
       <h2 data-i18n="notifyTitle"></h2>
       <p class="page-sub" data-i18n="notifySub"></p>
     </div>
-    <div class="ch-list">
-      <div class="ch-row">
-        <div class="ch-ident">
-          <span class="ch-ico tg"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs><linearGradient id="tgChGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#2AABEE"/><stop offset="1" stop-color="#229ED9"/>
-            </linearGradient></defs>
-            <circle cx="12" cy="12" r="12" fill="url(#tgChGrad)"/>
-            <path fill="#fff" d="M16.906 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-          </svg></span>
-          <div class="ch-t"><b>Telegram</b><span data-i18n="tgHint"></span></div>
-        </div>
-        <div class="ch-form">
-          <input id="tgTokenInput" data-i18n-attr="placeholder" data-i18n="tgTokenPh">
-          <input id="tgChatInput" data-i18n-attr="placeholder" data-i18n="tgChatPh" style="max-width:120px">
-          <button class="btn sm primary" id="tgSaveBtn" data-i18n="save"></button>
-          <button class="btn sm" id="tgTestBtn" data-i18n="chTest"></button>
-        </div>
-      </div>
-      <div class="ch-row">
-        <div class="ch-ident">
-          <span class="ch-ico bark"><img src="https://bark.day.app/_media/Icon.png" alt="Bark" loading="lazy"
-            onerror="this.style.display='none';this.parentElement.textContent='🐶'"></span>
-          <div class="ch-t"><b>Bark <em>iOS</em></b><span data-i18n="barkHint"></span></div>
-        </div>
-        <div class="ch-form">
-          <input id="barkKeyInput" data-i18n-attr="placeholder" data-i18n="barkKeyPh">
-          <input id="barkServerInput" data-i18n-attr="placeholder" data-i18n="barkServerPh" style="max-width:150px">
-          <button class="btn sm primary" id="barkSaveBtn" data-i18n="save"></button>
-          <button class="btn sm" id="barkTestBtn" data-i18n="chTest"></button>
-        </div>
-      </div>
-      <div class="ch-row">
-        <div class="ch-ident">
-          <span class="ch-ico http"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 16c0-1.84 1-3.45 2.48-4.32c.67-.39 1.52.08 1.52.86c0 .36-.19.68-.5.86c-.9.52-1.5 1.49-1.5 2.6c0 1.85 1.68 3.31 3.6 2.94c1.42-.28 2.4-1.61 2.4-3.06c0-.49.39-.88.88-.88h5c.27-.31.67-.5 1.12-.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5c-.44 0-.84-.19-1.12-.5H11.9A5 5 0 0 1 2 16m14.37-9c.65 0 1.14-.62.97-1.25A4.99 4.99 0 0 0 12.5 2a5.002 5.002 0 0 0-3.45 8.62l-2.35 3.9c-.68.14-1.2.75-1.2 1.48c0 .83.67 1.5 1.5 1.5a1.498 1.498 0 0 0 1.43-1.95l2.86-4.75c.25-.41.13-.95-.28-1.19c-.9-.53-1.51-1.5-1.51-2.61c0-1.65 1.35-3 3-3c1.38 0 2.54.93 2.89 2.2c.13.46.51.8.98.8m.63 6c-.38 0-.75.07-1.09.2c-.4.16-.86-.04-1.08-.41l-2.6-4.32C11.53 8.35 11 7.74 11 7c0-.83.67-1.5 1.5-1.5S14 6.17 14 7c0 .15-.02.29-.06.43l2.19 3.65c.28-.05.57-.08.87-.08c2.76 0 5 2.24 5 5s-2.24 5-5 5c-.86 0-1.68-.22-2.39-.61c-.92-.5-.58-1.89.47-1.89c.17 0 .34.05.49.14c.42.23.91.36 1.43.36c1.65 0 3-1.35 3-3s-1.35-3-3-3"/></svg></span>
-          <div class="ch-t"><b>HTTP Webhook</b><span data-i18n="httpHint"></span></div>
-        </div>
-        <div class="ch-form">
-          <input id="httpUrlInput" data-i18n-attr="placeholder" data-i18n="httpUrlPh">
-          <button class="btn sm primary" id="httpSaveBtn" data-i18n="save"></button>
-          <button class="btn sm" id="httpTestBtn" data-i18n="chTest"></button>
-        </div>
-      </div>
-    </div>
+    <div class="ch-grid" id="channelCards"></div>
     <div class="section-title" style="margin-top:22px"><span data-i18n="eventsTitle"></span></div>
     <div id="notifyList"></div>
+  </div>
+</div>
+
+<!-- ===== 渠道配置弹窗 ===== -->
+<div class="modal-bg" id="channelModal">
+  <div class="modal narrow">
+    <h3 id="chModalTitle"></h3>
+    <div id="chForm" style="margin-top:16px"></div>
+    <div class="hint" id="chFormHint" style="line-height:1.7"></div>
+    <div class="modal-actions">
+      <button class="btn soft" id="chTestBtn" data-i18n="chTest" style="margin-right:auto;display:none"></button>
+      <button class="btn" id="chCancel" data-i18n="cancel"></button>
+      <button class="btn primary" id="chSave" data-i18n="save"></button>
+    </div>
   </div>
 </div>
 
@@ -1171,7 +1168,7 @@ const I18N = {
     pickRegions:"选择查询地区", presetCommon:"常用 30 国", presetAll:"全部",
     presetNone:"取消", presetAsia:"亚太", presetEU:"欧洲", presetAmericas:"美洲",
     cancel:"取消", saveAndQuery:"保存并查询", close:"关闭", filterPlaceholder:"筛选…",
-    accountTitle:"修改账号", oldPassword:"当前密码", newPassword:"新密码",
+    accountTitle:"修改账户密码", oldPassword:"当前密码", newPassword:"新密码",
     pwdHint:"至少 6 位", changeUsername:"修改用户名（留空保持不变）",
     needOldPwd:"请输入当前密码", nothingChanged:"请填写新密码或新用户名",
     accountSaved:"账号已更新 ✓", mustChangePwd:"首次登录请修改默认密码",
@@ -1202,6 +1199,7 @@ const I18N = {
     userMgmt:"用户", allowRegister:"开放注册", createUser:"创建", roleAdmin:"管理员", roleUser:"普通用户",
     adminAddUser:"添加用户",
     publicApiAccess:"公开API访问权限",
+    apiSub:"创建 API 密钥，供脚本或第三方工具调用数据接口",
     apiNeedAuth:"数据接口已开启保护，请先登录",
     resetPwd:"重置密码", newPwdFor:"为 {u} 设置新密码：", confirmDel:"确定删除用户 {u}？",
     usersLoadFail:"加载用户列表失败", needAdmin:"需要管理员权限", opDone:"操作成功 ✓",
@@ -1220,8 +1218,13 @@ const I18N = {
     httpUrlPh:"Webhook URL（POST JSON）",
     httpHint:"价格变动时向该地址 POST JSON（含 app 与 events 数组），适合 n8n / 自建服务。",
     tgTokenPh:"Bot Token（@BotFather 创建）", tgChatPh:"Chat ID",
+    tgGroupPh:"群组 ID（可选，发 /id 获取）",
     tgTest:"发送测试", tgTestOk:"✅ 测试消息已发送", tgTestFail:"发送失败，请检查配置",
     chTest:"测试", chTestOk:"✅ 测试推送已发送", chTestFail:"发送失败，请检查配置",
+    chModalTitle:"配置通知渠道", chPick:"渠道", chConfig:"配置", chOn:"已配置", chOff:"未配置",
+    chNameLbl:"名称",
+    tgTokenLbl:"机器人 Token", tgChatLbl:"Chat ID", tgGroupLbl:"群组 ID", optional:"可选",
+    barkKeyLbl:"Device Key", barkSrvLbl:"服务器地址",
     barkKeyPh:"Device Key（Bark App 内复制）", barkServerPh:"服务器地址（可选，默认官方）",
     barkHint:"iOS 安装 Bark App 后，在 App 内复制 Key 粘贴到上面；自建服务器可改地址。",
     tgHint:"在 Telegram 找 @BotFather 创建机器人拿到 Token；把机器人拉进对话或群，用 @userinfobot 查 Chat ID。价格变动会自动推送到这里。",
@@ -1261,7 +1264,7 @@ const I18N = {
     pickRegions:"Pick query regions", presetCommon:"Top 30", presetAll:"All",
     presetNone:"Clear", presetAsia:"Asia-Pacific", presetEU:"Europe", presetAmericas:"Americas",
     cancel:"Cancel", saveAndQuery:"Save & Query", close:"Close", filterPlaceholder:"Filter…",
-    accountTitle:"Account settings", oldPassword:"Current password", newPassword:"New password",
+    accountTitle:"Account & Password", oldPassword:"Current password", newPassword:"New password",
     pwdHint:"At least 6 characters", changeUsername:"Change username (leave empty to keep)",
     needOldPwd:"Current password required", nothingChanged:"Enter a new password or username",
     accountSaved:"Account updated ✓", mustChangePwd:"Please change the default password first",
@@ -1292,6 +1295,7 @@ const I18N = {
     userMgmt:"Users", allowRegister:"Open registration", createUser:"Create", roleAdmin:"Admin", roleUser:"User",
     adminAddUser:"Add user",
     publicApiAccess:"Public API access",
+    apiSub:"Create API keys for scripts and third-party tools",
     apiNeedAuth:"API is protected — please sign in",
     resetPwd:"Reset password", newPwdFor:"New password for {u}:", confirmDel:"Delete user {u}?",
     usersLoadFail:"Failed to load users", needAdmin:"Admin required", opDone:"Done ✓",
@@ -1310,8 +1314,13 @@ const I18N = {
     httpUrlPh:"Webhook URL (POST JSON)",
     httpHint:"On price changes we POST JSON ({app, events[]}) to this URL. Works with n8n / your own service.",
     tgTokenPh:"Bot Token (create via @BotFather)", tgChatPh:"Chat ID",
+    tgGroupPh:"Group ID (optional, send /id)",
     tgTest:"Send test", tgTestOk:"✅ Test message sent", tgTestFail:"Send failed, check config",
     chTest:"Test", chTestOk:"✅ Test push sent", chTestFail:"Send failed, check config",
+    chModalTitle:"Configure channels", chPick:"Channel", chConfig:"Configure", chOn:"Configured", chOff:"Not set",
+    chNameLbl:"Name",
+    tgTokenLbl:"Bot Token", tgChatLbl:"Chat ID", tgGroupLbl:"Group ID", optional:"optional",
+    barkKeyLbl:"Device Key", barkSrvLbl:"Server URL",
     barkKeyPh:"Device Key (copy from Bark app)", barkServerPh:"Server (optional, default official)",
     barkHint:"Install Bark on iOS and paste its Key above; change the server URL if self-hosting.",
     tgHint:"Create a bot with @BotFather to get a Token; add the bot to a chat and get your Chat ID from @userinfobot. Price changes will be pushed here automatically.",
@@ -1420,7 +1429,7 @@ async function api(path, params){
   const qs = new URLSearchParams(params).toString();
   const headers = { "X-Web-App": "1" };
   if (state.token) headers["X-Auth-Token"] = state.token;
-  const r = await fetch(`/api/${path}?${qs}`, { headers });
+  const r = await fetch(`/atlas/${path}?${qs}`, { headers });
   if(!r.ok){
     if (r.status === 401) await apiAuthHint(r);
     throw new Error(`HTTP ${r.status}`);
@@ -1520,9 +1529,10 @@ function applyThemeTitle(){
 /* ====================== 登录 / 注册 ====================== */
 let authUser = null;        // 登录后为 {name, role}
 let authMode = "login";     // "login" | "register"
+let authRedirect = null;    // 未登录访问受限页时记录,登录成功后跳回
 
 async function postJSON(path, body){
-  const r = await fetch("/api/" + path, {
+  const r = await fetch("/atlas/" + path, {
     method:"POST",
     headers:{ "Content-Type":"application/json", ...(state.token ? {"X-Auth-Token":state.token} : {}) },
     body: JSON.stringify(body || {}),
@@ -1533,7 +1543,7 @@ async function postJSON(path, body){
 async function initAuth(){
   if (!state.token){ authUser = null; return; }
   try{
-    const r = await fetch("/api/me", { headers:{ "X-Auth-Token": state.token } });
+    const r = await fetch("/atlas/me", { headers:{ "X-Auth-Token": state.token } });
     const d = await r.json();
     if (d.ok) authUser = { name:d.username, role:d.role || "user", mustChange: !!d.must_change };
     else { state.token = null; save(); authUser = null; }
@@ -1580,7 +1590,8 @@ async function submitAuth(){
       $("loginPass").value = "";
       toast(t(authMode === "register" ? "registered" : "loginOk", {u:authUser.name}));
       updateAuthUI();
-      if (d.must_change){ openAccount(true); }
+      if (d.must_change) openAccount(true);
+      if (authRedirect){ const dest = authRedirect; authRedirect = null; navigate(dest); }
       if (currentApp && currentMode === "iap" && allOffers.length) renderForOffer();
     } else {
       $("loginErr").textContent = authErrText(d.error);
@@ -1591,10 +1602,12 @@ async function submitAuth(){
 function doLogout(){
   const token = state.token;
   authUser = null; state.token = null; save();
-  if (token) fetch("/api/logout", { method:"POST", headers:{"Content-Type":"application/json", "X-Auth-Token":token}, body:"{}" }).catch(()=>{});
+  if (token) fetch("/atlas/logout", { method:"POST", headers:{"Content-Type":"application/json", "X-Auth-Token":token}, body:"{}" }).catch(()=>{});
   toast(t("loggedOut"));
   updateAuthUI();
   multiSelectIds.clear(); updateMultiBar();
+  // 受限页在登出后不可停留,回首页
+  if (location.hash === "#/api" || location.hash === "#/notify") navigate("#/");
   if (currentApp && currentMode === "iap" && allOffers.length) renderForOffer();
 }
 
@@ -1620,7 +1633,8 @@ async function submitAccount(){
       if (!d.ok) return err(authErrText(d.error));
     }
     if (nn && nn !== authUser.name){
-      const d = await postJSON("username", { username: nn, password: old });
+      // 若同时改了密码,需用新密码验证
+      const d = await postJSON("username", { username: nn, password: np || old });
       if (!d.ok) return err(authErrText(d.error));
       state.token = d.token; save(); authUser.name = nn;
     }
@@ -1642,10 +1656,13 @@ function openPwdModal(title, cb){
   $("pwdModal").classList.add("show");
   setTimeout(()=>$("pwdModalInput").focus(), 60);
 }
+const ADMIN_MARK = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>';
+const USER_MARK = '<svg class="usr" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0-4.5-4.5A4.5 4.5 0 0 0 12 12zm0 2.2c-3.9 0-7.2 2-7.2 4.5V21h14.4v-2.3c0-2.5-3.3-4.5-7.2-4.5z"/></svg>';
 function updateAuthUI(){
   $("navLoginBtn").style.display = authUser ? "none" : "";
   $("navCluster").style.display = authUser ? "flex" : "none";
-  if (authUser) $("navUser").textContent = authUser.name;
+  if (authUser) $("navUser").innerHTML =
+    (authUser.role === "admin" ? ADMIN_MARK : USER_MARK) + esc(authUser.name);
   $("addWatchBtn").classList.toggle("gated-locked", !authUser);
   $("familyBtn").classList.toggle("gated-locked", !authUser);
   $("exportBtn").classList.toggle("gated-locked", !authUser);
@@ -1672,7 +1689,7 @@ async function adminAction(path, body){
 }
 async function reloadAdmin(){
   try{
-    const r = await fetch("/api/users", { headers:{ "X-Auth-Token": state.token || "" } });
+    const r = await fetch("/atlas/users", { headers:{ "X-Auth-Token": state.token || "" } });
     const d = await r.json();
     if (!d.ok){ toast(t("needAdmin")); return; }
     $("allowRegister").checked = !!d.allow_register;
@@ -1689,10 +1706,14 @@ async function reloadAdmin(){
           <option value="admin" ${u.role==="admin"?"selected":""}>${t("roleAdmin")}</option>
           <option value="user" ${u.role!=="admin"?"selected":""}>${t("roleUser")}</option>
         </select>
-        <button class="btn ghost sm" data-pwd="${esc(u.username)}">${t("resetPwd")}</button>
+        ${self?`<button class="btn ghost sm" data-account="1">${t("accountTitle")}</button>`
+              :`<button class="btn ghost sm" data-pwd="${esc(u.username)}">${t("resetPwd")}</button>`}
         <button class="btn ghost sm" data-del="${esc(u.username)}" ${self||!isAdmin?"disabled":""}>✕</button>
       </div>`;
     }).join("");
+    $("adminUserList").querySelectorAll("button[data-account]").forEach(btn=>{
+      btn.addEventListener("click", ()=>openAccount(false));
+    });
     $("adminUserList").querySelectorAll("select[data-role-for]").forEach(sel=>{
       sel.addEventListener("change", ()=>adminAction("users/set_role", { username:sel.dataset.roleFor, role:sel.value }));
     });
@@ -2844,7 +2865,7 @@ async function openWatchModal(){
   $("watchRegions").innerHTML = state.selectedCountries.map(cc=>`
     <label class="chk-item"><input type="checkbox" value="${cc}">
       <span>${flagOf(cc)} ${esc(nameOf(cc))}</span></label>`).join("");
-  const r = await fetch("/api/watch", {headers:{"X-Auth-Token": state.token || ""}})
+  const r = await fetch("/atlas/watch", {headers:{"X-Auth-Token": state.token || ""}})
     .then(x=>x.json()).catch(()=>null);
   const mine = r && r.ok ? (r.watches||[]).find(w=>String(w.app_id)===String(currentApp.trackId)) : null;
   const cfg = mine || {triggers:["drop","raise","new","remove"], offers:[], regions:[]};
@@ -2857,39 +2878,39 @@ async function openWatchModal(){
   $("watchModal").classList.add("show");
 }
 function showApi(){
-  if (!authUser){ openLogin(); showHome(); return; }
+  if (!authUser){ authRedirect = "#/api"; openLogin(); navigate("#/"); return; }
   showView("viewApi");
-  $("apiOrigin").textContent = location.origin + "/api";
+  $("apiOrigin").textContent = location.origin + "/atlas";
   $("apiDocs").textContent =
     "# 通用说明\n" +
-    "#  数据接口: /api/search /api/lookup /api/iap /api/top /api/fx\n" +
+    "#  数据接口: /atlas/search /atlas/lookup /atlas/iap /atlas/top /atlas/fx\n" +
     "#  鉴权方式: 请求头 X-API-Key: <你的密钥> (长期脚本推荐)\n" +
     "#            或 X-Auth-Token: <登录token> (7天有效)\n" +
     "#  错误格式: {\"ok\":false,\"error\":\"<code>\"}，HTTP 4xx/5xx\n\n" +
     "# 1) 搜索应用 (q=关键词或App ID; country=区码,默认us)\n" +
-    `curl "${location.origin}/api/search?q=chatgpt&country=us" \\\n` +
+    `curl "${location.origin}/atlas/search?q=chatgpt&country=us" \\\n` +
     '  -H "X-API-Key: <你的密钥>"\n' +
     '#  → {"results":[{trackId,trackName,artistName,formattedPrice,description,...}]}\n\n' +
     "# 2) 应用详情与本体价格 (id=App ID; country=区码)\n" +
-    `curl "${location.origin}/api/lookup?id=6448311069&country=us" \\\n` +
+    `curl "${location.origin}/atlas/lookup?id=6448311069&country=us" \\\n` +
     '  -H "X-API-Key: <你的密钥>"\n' +
     '#  → results[0]: trackName/formattedPrice/version/trackViewUrl 等\n\n' +
     "# 3) 内购/订阅价格 (id=App ID; country=区码)\n" +
-    `curl "${location.origin}/api/iap?id=6448311069&country=tr" \\\n` +
+    `curl "${location.origin}/atlas/iap?id=6448311069&country=tr" \\\n` +
     '  -H "X-API-Key: <你的密钥>"\n' +
     '#  → {"country":"tr","appName":"ChatGPT","iaps":[{iapId,name,\n' +
     '#      isSubscription,groupName,currencyCode,price,priceFormatted,period}]}\n' +
     "#  未上架返回 {\"ok\":false,\"reason\":\"not_listed\"}\n\n" +
     "# 4) 热门订阅App清单\n" +
-    `curl "${location.origin}/api/top" -H "X-API-Key: <你的密钥>"\n` +
+    `curl "${location.origin}/atlas/top" -H "X-API-Key: <你的密钥>"\n` +
     '#  → {"apps":[{id,name,artist,icon}]}\n\n' +
     "# 5) 实时汇率 (USD基准,每6小时刷新)\n" +
-    `curl "${location.origin}/api/fx" -H "X-API-Key: <你的密钥>"\n` +
+    `curl "${location.origin}/atlas/fx" -H "X-API-Key: <你的密钥>"\n` +
     '#  → {"base":"USD","rates":{"CNY":7.1,...}}';
   reloadKeys();
 }
 async function reloadKeys(){
-  const r = await fetch("/api/keys", {headers:{"X-Auth-Token": state.token || ""}})
+  const r = await fetch("/atlas/keys", {headers:{"X-Auth-Token": state.token || ""}})
     .then(x=>x.json()).catch(()=>null);
   const wrap = $("keyTableWrap");
   if (!r || !r.ok){ wrap.innerHTML = `<div class="empty">${t("loadFail")}</div>`; return; }
@@ -2913,20 +2934,14 @@ async function reloadKeys(){
     }));
 }
 function showNotify(){
-  if (!authUser){ openLogin(); showHome(); return; }
+  if (!authUser){ authRedirect = "#/notify"; openLogin(); navigate("#/"); return; }
   showView("viewNotify");
-  fetch("/api/channels", {headers:{"X-Auth-Token": state.token || ""}})
+  fetch("/atlas/channels", {headers:{"X-Auth-Token": state.token || ""}})
     .then(x=>x.json()).then(d=>{
-      if (d.ok){
-        const ch = d.channels || {};
-        $("tgTokenInput").value = ch.tg?.bot_token || "";
-        $("tgChatInput").value = ch.tg?.chat_id || "";
-        $("barkKeyInput").value = ch.bark?.device_key || "";
-        $("barkServerInput").value = ch.bark?.server || "";
-        $("httpUrlInput").value = ch.http?.url || "";
-      }
-    }).catch(()=>{});
-  fetch("/api/notifications", {headers:{"X-Auth-Token": state.token || ""}})
+      if (d.ok){ notifyChannels = d.channels || {}; }
+      renderChannelCards();
+    }).catch(()=>{ renderChannelCards(); });
+  fetch("/atlas/notifications", {headers:{"X-Auth-Token": state.token || ""}})
     .then(x=>x.json()).then(d=>{
       const box = $("notifyList");
       const events = (d && d.ok) ? (d.events || []) : [];
@@ -3023,32 +3038,77 @@ $("createKeyBtn").addEventListener("click", async ()=>{
 
 /* 价格通知 */
 $("navNotifyBtn").addEventListener("click", gated(()=>navigate("#/notify")));
-$("tgSaveBtn").addEventListener("click", async ()=>{
-  const r = await postJSON("channels/save", {type:"tg",
-    config:{bot_token: $("tgTokenInput").value.trim(), chat_id: $("tgChatInput").value.trim()}});
-  toast(r.ok ? t("saved") : authErrText(r.error));
-});
-$("tgTestBtn").addEventListener("click", async ()=>{
-  const r = await postJSON("channels/test", {type:"tg"});
+/* 渠道配置(弹窗式) */
+const CH_META = {
+  tg:{name:"Telegram", hintKey:"tgHint",
+    icon:'<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="tgChGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2AABEE"/><stop offset="1" stop-color="#229ED9"/></linearGradient></defs><circle cx="12" cy="12" r="12" fill="url(#tgChGrad2)"/><path fill="#fff" d="M16.906 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>'},
+  bark:{name:"Bark", ios:true, hintKey:"barkHint",
+    icon:'<img src="https://bark.day.app/_media/Icon.png" alt="Bark" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.textContent=\'🐶\'">'},
+  http:{name:"HTTP Webhook", hintKey:"httpHint",
+    icon:'<svg viewBox="0 0 24 24" fill="var(--accent)" aria-hidden="true"><path d="M2 16c0-1.84 1-3.45 2.48-4.32c.67-.39 1.52.08 1.52.86c0 .36-.19.68-.5.86c-.9.52-1.5 1.49-1.5 2.6c0 1.85 1.68 3.31 3.6 2.94c1.42-.28 2.4-1.61 2.4-3.06c0-.49.39-.88.88-.88h5c.27-.31.67-.5 1.12-.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5c-.44 0-.84-.19-1.12-.5H11.9A5 5 0 0 1 2 16m14.37-9c.65 0 1.14-.62.97-1.25A4.99 4.99 0 0 0 12.5 2a5.002 5.002 0 0 0-3.45 8.62l-2.35 3.9c-.68.14-1.2.75-1.2 1.48c0 .83.67 1.5 1.5 1.5a1.498 1.498 0 0 0 1.43-1.95l2.86-4.75c.25-.41.13-.95-.28-1.19c-.9-.53-1.51-1.5-1.51-2.61c0-1.65 1.35-3 3-3c1.38 0 2.54.93 2.89 2.2c.13.46.51.8.98.8m.63 6c-.38 0-.75.07-1.09.2c-.4.16-.86-.04-1.08-.41l-2.6-4.32C11.53 8.35 11 7.74 11 7c0-.83.67-1.5 1.5-1.5S14 6.17 14 7c0 .15-.02.29-.06.43l2.19 3.65c.28-.05.57-.08.87-.08c2.76 0 5 2.24 5 5s-2.24 5-5 5c-.86 0-1.68-.22-2.39-.61c-.92-.5-.58-1.89.47-1.89c.17 0 .34.05.49.14c.42.23.91.36 1.43.36c1.65 0 3-1.35 3-3s-1.35-3-3-3"/></svg>'},
+};
+let notifyChannels = {};
+let chType = "tg";
+function renderChannelCards(){
+  const box = $("channelCards");
+  box.innerHTML = ["tg","bark","http"].map(tp=>{
+    const m = CH_META[tp], cfg = notifyChannels[tp] || {};
+    const on = tp==="tg" ? !!cfg.bot_token : tp==="bark" ? !!cfg.device_key : !!cfg.url;
+    return `<div class="ch-pick-card" data-chconf="${tp}">
+      <span class="ch-pick-ico">${m.icon}</span>
+      <span class="nm" style="font-size:12.5px;font-weight:600">${m.name}${m.ios?' <em>iOS</em>':""}</span>
+      ${cfg.name?`<span style="font-size:11px;color:var(--muted)">${esc(cfg.name)}</span>`:""}
+      <span class="ch-badge ${on?'ok':'off'}">${t(on?'chOn':'chOff')}</span></div>`;
+  }).join("");
+  box.querySelectorAll("[data-chconf]").forEach(b=>b.addEventListener("click",()=>openChannelModal(b.dataset.chconf)));
+}
+function openChannelModal(type){
+  chType = type || "tg";
+  const cfg = notifyChannels[chType] || {};
+  const on = chType==="tg" ? !!cfg.bot_token : chType==="bark" ? !!cfg.device_key : !!cfg.url;
+  $("chModalTitle").textContent = `${t("chConfig")} · ${CH_META[chType].name}`;
+  $("chTestBtn").style.display = on ? "" : "none";
+  $("channelModal").classList.add("show");
+  renderChForm();
+}
+function chField(label, id, val){
+  return `<div class="field"><span>${label}</span><input id="${id}" value="${esc(val||"")}"></div>`;
+}
+function renderChForm(){
+  const cfg = notifyChannels[chType] || {};
+  let html;
+  const nameField = chField(t("chNameLbl"),"chName",cfg.name);
+  if (chType==="tg"){
+    html = chField(t("tgTokenLbl"),"chTgToken",cfg.bot_token)
+         + chField(t("tgChatLbl"),"chTgChat",cfg.chat_id)
+         + chField(`${t("tgGroupLbl")}（${t("optional")}）`,"chTgGroup",cfg.group_id);
+  } else if (chType==="bark"){
+    html = chField(t("barkKeyLbl"),"chBarkKey",cfg.device_key)
+         + chField(`${t("barkSrvLbl")}（${t("optional")}）`,"chBarkSrv",cfg.server);
+  } else {
+    html = nameField
+         + chField("Webhook URL","chHttpUrl",cfg.url);
+  }
+  $("chForm").innerHTML = html;
+  $("chFormHint").textContent = t(CH_META[chType].hintKey);
+}
+async function saveChannel(){
+  const tp = chType; let config;
+  if (tp==="tg") config = {bot_token:$("chTgToken").value.trim(), chat_id:$("chTgChat").value.trim(), group_id:$("chTgGroup").value.trim()};
+  else if (tp==="bark") config = {device_key:$("chBarkKey").value.trim(), server:$("chBarkSrv").value.trim()};
+  else config = {name:$("chName").value.trim(), url:$("chHttpUrl").value.trim()};
+  const r = await postJSON("channels/save", {type:tp, config});
+  if (r.ok){ toast(t("saved")); $("channelModal").classList.remove("show"); showNotify(); }
+  else toast(authErrText(r.error));
+}
+$("chCancel").addEventListener("click", ()=>$("channelModal").classList.remove("show"));
+$("chSave").addEventListener("click", saveChannel);
+$("chTestBtn").addEventListener("click", async ()=>{
+  const r = await postJSON("channels/test", {type: chType});
   toast(r.ok ? t("chTestOk") : t("chTestFail"));
 });
-$("barkSaveBtn").addEventListener("click", async ()=>{
-  const r = await postJSON("channels/save", {type:"bark",
-    config:{device_key: $("barkKeyInput").value.trim(), server: $("barkServerInput").value.trim()}});
-  toast(r.ok ? t("saved") : authErrText(r.error));
-});
-$("barkTestBtn").addEventListener("click", async ()=>{
-  const r = await postJSON("channels/test", {type:"bark"});
-  toast(r.ok ? t("chTestOk") : t("chTestFail"));
-});
-$("httpSaveBtn").addEventListener("click", async ()=>{
-  const r = await postJSON("channels/save", {type:"http", config:{url: $("httpUrlInput").value.trim()}});
-  toast(r.ok ? t("saved") : authErrText(r.error));
-});
-$("httpTestBtn").addEventListener("click", async ()=>{
-  const r = await postJSON("channels/test", {type:"http"});
-  toast(r.ok ? t("chTestOk") : t("chTestFail"));
-});
+$("channelModal").addEventListener("click", e=>{ if(e.target.id==="channelModal") e.target.classList.remove("show"); });
+
 $("appStoreBtn").addEventListener("click", ()=>{
   if (currentApp) window.open("https://apps.apple.com/us/app/id" + currentApp.trackId, "_blank");
 });
@@ -3058,7 +3118,6 @@ $("navLoginBtn").addEventListener("click", ()=>openLogin("login"));
 $("authSwitchLink").addEventListener("click", ()=>openLogin(authMode === "login" ? "register" : "login"));
 $("logoutBtn").addEventListener("click", doLogout);
 $("navAdminBtn").addEventListener("click", openAdmin);
-$("navUser").addEventListener("click", ()=>openAccount(false));
 $("accCancel").addEventListener("click", ()=>$("accountModal").classList.remove("show"));
 $("accSave").addEventListener("click", submitAccount);
 $("accountModal").addEventListener("click", e=>{
@@ -3074,6 +3133,13 @@ $("pwdModalOk").addEventListener("click", ()=>{
 $("pwdModalCancel").addEventListener("click", ()=>$("pwdModal").classList.remove("show"));
 $("pwdModalInput").addEventListener("keydown", e=>{ if(e.key==="Enter") $("pwdModalOk").click(); });
 $("pwdModal").addEventListener("click", e=>{ if(e.target.id==="pwdModal") e.target.classList.remove("show"); });
+document.addEventListener("keydown", e=>{
+  if (e.key !== "Escape") return;
+  document.querySelectorAll(".modal-bg.show").forEach(m=>{
+    if (m.id === "accountModal" && forcePwd) return; // 首登强制改密不可跳过
+    m.classList.remove("show");
+  });
+});
 $("adminClose").addEventListener("click", ()=>$("adminModal").classList.remove("show"));
 $("adminModal").addEventListener("click", e=>{ if(e.target.id==="adminModal") e.target.classList.remove("show"); });
 $("allowRegister").addEventListener("change", e=>adminAction("config/set", { allow_register: e.target.checked }));

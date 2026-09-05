@@ -68,11 +68,23 @@ class Handler(BaseHTTPRequestHandler):
             if path in ("/", "/index.html"):
                 return self._send_html()
 
+            # /atlas 根路径:API 入口说明(供程序调用者自省)
+            if path in ("/atlas", "/atlas/"):
+                return self._send({
+                    "ok": True, "service": "App Atlas API",
+                    "web": f"http://{self.headers.get('Host', '127.0.0.1:8765')}/",
+                    "auth": "X-API-Key: <密钥>(网页「API」页创建) 或 X-Auth-Token: <登录token>",
+                    "endpoints": [
+                        "/atlas/search?q=<关键词>&country=<区码>",
+                        "/atlas/lookup?id=<AppID>&country=<区码>",
+                        "/atlas/iap?id=<AppID>&country=<区码>",
+                        "/atlas/top", "/atlas/fx", "/atlas/me"]})
+
             if path == "/health":
                 return self._send({"ok": True, "ts": int(time.time())})
 
             # ---------- 0. 登录状态 ----------
-            if path == "/api/me":
+            if path == "/atlas/me":
                 info = store.get_session(self.headers)
                 if info:
                     users, _ = store.load_users()
@@ -97,24 +109,24 @@ class Handler(BaseHTTPRequestHandler):
                                       status=401)
 
             # ---------- 0.2 登录用户的密钥 / 监控 / 通知 / 渠道 ----------
-            if path in ("/api/keys", "/api/watch", "/api/notifications", "/api/channels"):
+            if path in ("/atlas/keys", "/atlas/watch", "/atlas/notifications", "/atlas/channels"):
                 info = store.get_session(self.headers)
                 if not info:
                     return self._send({"ok": False, "error": "unauthorized"}, status=401)
                 users, meta = store.load_users()
                 rec = users.get(info["username"]) or {}
-                if path == "/api/keys":
+                if path == "/atlas/keys":
                     return self._send({"ok": True, "keys": rec.get("api_keys", [])})
-                if path == "/api/watch":
+                if path == "/atlas/watch":
                     return self._send({"ok": True, "watches": rec.get("watches", [])})
-                if path == "/api/notifications":
+                if path == "/atlas/notifications":
                     notifs = store.load_json_file(config.NOTIF_FILE, {})
                     return self._send({"ok": True,
                                        "events": notifs.get(info["username"], [])[:100]})
                 return self._send({"ok": True, "channels": rec.get("channels", {})})
 
             # ---------- 0.5 用户管理(仅管理员) ----------
-            if path == "/api/users":
+            if path == "/atlas/users":
                 info = store.get_session(self.headers)
                 if not info:
                     return self._send({"ok": False, "error": "unauthorized"}, status=401)
@@ -131,7 +143,7 @@ class Handler(BaseHTTPRequestHandler):
                                              for u, r in sorted(users.items())]})
 
             # ---------- 1. 搜索应用 ----------
-            if path == "/api/search":
+            if path == "/atlas/search":
                 term = qs.get("q", "").strip()
                 cc = qs.get("country", "us").lower()
                 if not term:
@@ -142,7 +154,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._err("search upstream error", 502)
 
             # ---------- 2. 应用详情 (lookup, 缓存 1 天,lang 本地化) ----------
-            if path == "/api/lookup":
+            if path == "/atlas/lookup":
                 aid = qs.get("id")
                 cc = qs.get("country", "us").lower()
                 lang = qs.get("lang", "").lower()
@@ -167,7 +179,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._err("upstream error", 502)
 
             # ---------- 3. 内购订阅价格 (核心, 成功缓存 6 小时) ----------
-            if path == "/api/iap":
+            if path == "/atlas/iap":
                 aid = qs.get("id")
                 cc = qs.get("country", "us").lower()
                 if not aid:
@@ -180,7 +192,7 @@ class Handler(BaseHTTPRequestHandler):
             # ---------- 3.5 热门订阅 App（人工策划清单,元数据实时拉取,缓存 24h） ----------
             # Apple 官方没有"订阅榜",主流比价站均为人工策划;
             # 清单对齐 ChatGPT/Claude/Gemini/流媒体/社交等有订阅内购的头部 App
-            if path == "/api/top":
+            if path == "/atlas/top":
                 ck = "top:subs10:v2"
                 cached = cache.cache_get(ck)
                 if cached is not None:
@@ -213,7 +225,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._err("top chart unavailable", 502)
 
             # ---------- 4. 实时汇率（USD 基准,TG 机器人共用 fx.get_fx_rates） ----------
-            if path == "/api/fx":
+            if path == "/atlas/fx":
                 rates = fx.get_fx_rates()
                 if rates:
                     return self._send({"base": "USD", "rates": rates})
@@ -260,7 +272,7 @@ class Handler(BaseHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         body = self._read_json_body()
 
-        if path == "/api/login":
+        if path == "/atlas/login":
             username = str(body.get("username", "")).strip()
             rec = store.check_login(username, str(body.get("password", "")))
             if rec:
@@ -275,7 +287,7 @@ class Handler(BaseHTTPRequestHandler):
                                    "must_change": bool(rec.get("must_change"))})
             return self._send({"ok": False, "error": "bad_credentials"}, status=401)
 
-        if path == "/api/register":
+        if path == "/atlas/register":
             username = str(body.get("username", "")).strip()
             password = str(body.get("password", ""))
             err = self._validate_new_user(username, password)
@@ -294,11 +306,11 @@ class Handler(BaseHTTPRequestHandler):
             token = store.issue_token(username)
             return self._send({"ok": True, "token": token, "username": username, "role": "user"})
 
-        if path == "/api/logout":
+        if path == "/atlas/logout":
             store.SESSIONS.pop(self.headers.get("X-Auth-Token", ""), None)
             return self._send({"ok": True})
 
-        if path == "/api/password":  # 修改自己的密码
+        if path == "/atlas/password":  # 修改自己的密码
             info = store.get_session(self.headers)
             if not info:
                 return self._send({"ok": False, "error": "unauthorized"}, status=401)
@@ -316,7 +328,7 @@ class Handler(BaseHTTPRequestHandler):
                 store.save_users(users, meta)
             return self._send({"ok": True})
 
-        if path == "/api/username":  # 修改自己的用户名
+        if path == "/atlas/username":  # 修改自己的用户名
             info = store.get_session(self.headers)
             if not info:
                 return self._send({"ok": False, "error": "unauthorized"}, status=401)
@@ -332,6 +344,11 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send({"ok": False, "error": "user_exists"}, status=409)
                 users[newname] = users.pop(info["username"])
                 store.save_users(users, meta)
+                # 通知事件按用户名索引,一并迁移
+                notifs = store.load_json_file(config.NOTIF_FILE, {})
+                if info["username"] in notifs:
+                    notifs[newname] = notifs.pop(info["username"])
+                    store.save_json_file(config.NOTIF_FILE, notifs)
             role = rec.get("role", "user")
             # 旧会话按用户名失效,换发新 token 保持登录态
             store.SESSIONS.pop(self.headers.get("X-Auth-Token", ""), None)
@@ -340,13 +357,13 @@ class Handler(BaseHTTPRequestHandler):
                                "username": newname, "role": role})
 
         # ---- 以下需要管理员 ----
-        if path in ("/api/users/create", "/api/users/set_role", "/api/users/delete",
-                    "/api/users/set_password", "/api/config/set"):
+        if path in ("/atlas/users/create", "/atlas/users/set_role", "/atlas/users/delete",
+                    "/atlas/users/set_password", "/atlas/config/set"):
             info, deny = self._require_admin()
             if deny:
                 return self._send(*deny)
 
-            if path == "/api/users/create":
+            if path == "/atlas/users/create":
                 username = str(body.get("username", "")).strip()
                 password = str(body.get("password", ""))
                 role = body.get("role", "user")
@@ -365,7 +382,7 @@ class Handler(BaseHTTPRequestHandler):
                     store.save_users(users, meta)
                 return self._send({"ok": True})
 
-            if path == "/api/users/set_role":
+            if path == "/atlas/users/set_role":
                 username = str(body.get("username", ""))
                 role = "admin" if body.get("role") == "admin" else "user"
                 with store.USER_LOCK:
@@ -381,7 +398,7 @@ class Handler(BaseHTTPRequestHandler):
                     store.save_users(users, meta)
                 return self._send({"ok": True})
 
-            if path == "/api/users/delete":
+            if path == "/atlas/users/delete":
                 username = str(body.get("username", ""))
                 with store.USER_LOCK:
                     users, meta = store.load_users()
@@ -395,7 +412,7 @@ class Handler(BaseHTTPRequestHandler):
                     store.save_users(users, meta)
                 return self._send({"ok": True})
 
-            if path == "/api/users/set_password":
+            if path == "/atlas/users/set_password":
                 username = str(body.get("username", ""))
                 newpwd = str(body.get("password", ""))
                 if len(newpwd) < 6:
@@ -410,7 +427,7 @@ class Handler(BaseHTTPRequestHandler):
                     store.save_users(users, meta)
                 return self._send({"ok": True})
 
-            if path == "/api/config/set":
+            if path == "/atlas/config/set":
                 # 全局配置开关:开放注册 / 接口需密钥(None=自动:本机开放,公网要求)
                 with store.USER_LOCK:
                     users, meta = store.load_users()
@@ -426,8 +443,8 @@ class Handler(BaseHTTPRequestHandler):
                                    "require_api_key_effective": store.api_gate_enabled(meta)})
 
         # ---- 登录用户的写操作:密钥 / 监控 / 渠道 ----
-        if path in ("/api/keys/create", "/api/keys/delete", "/api/watch/save",
-                    "/api/watch/delete", "/api/channels/save", "/api/channels/test"):
+        if path in ("/atlas/keys/create", "/atlas/keys/delete", "/atlas/watch/save",
+                    "/atlas/watch/delete", "/atlas/channels/save", "/atlas/channels/test"):
             info = store.get_session(self.headers)
             if not info:
                 return self._send({"ok": False, "error": "unauthorized"}, status=401)
@@ -437,10 +454,10 @@ class Handler(BaseHTTPRequestHandler):
                 if not rec:
                     return self._send({"ok": False, "error": "no_such_user"}, status=404)
 
-                if path == "/api/keys/create":
+                if path == "/atlas/keys/create":
                     name = str(body.get("name", "")).strip()[:32] or "key"
                     kid = secrets.token_hex(4)
-                    key = "atlas_live_" + secrets.token_urlsafe(24)
+                    key = "Atlas_" + secrets.token_urlsafe(24)
                     rec.setdefault("api_keys", []).append(
                         {"id": kid, "name": name, "key": key,
                          "created_at": int(time.time()), "last_used": 0})
@@ -448,14 +465,14 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send({"ok": True,
                                        "key": {"id": kid, "name": name, "key": key}})
 
-                if path == "/api/keys/delete":
+                if path == "/atlas/keys/delete":
                     kid = str(body.get("id", ""))
                     rec["api_keys"] = [k for k in rec.get("api_keys", [])
                                        if k.get("id") != kid]
                     store.save_users(users, meta)
                     return self._send({"ok": True})
 
-                if path == "/api/watch/save":
+                if path == "/atlas/watch/save":
                     aid = str(body.get("app_id", ""))
                     if not aid.isdigit():
                         return self._send({"ok": False, "error": "missing app_id"},
@@ -477,19 +494,22 @@ class Handler(BaseHTTPRequestHandler):
                     store.save_users(users, meta)
                     return self._send({"ok": True})
 
-                if path == "/api/watch/delete":
+                if path == "/atlas/watch/delete":
                     aid = str(body.get("app_id", ""))
                     rec["watches"] = [x for x in rec.get("watches", [])
                                       if str(x.get("app_id")) != aid]
                     store.save_users(users, meta)
                     return self._send({"ok": True})
 
-                if path == "/api/channels/save":
+                if path == "/atlas/channels/save":
                     ctype = str(body.get("type", ""))
                     cfg = dict(body.get("config") or {})
+                    ch_name = str(cfg.get("name", ""))[:40]
                     if ctype == "tg":
-                        cfg = {"bot_token": str(cfg.get("bot_token", ""))[:64],
-                               "chat_id": str(cfg.get("chat_id", ""))[:32]}
+                        cfg = {"name": ch_name,
+                               "bot_token": str(cfg.get("bot_token", ""))[:64],
+                               "chat_id": str(cfg.get("chat_id", ""))[:32],
+                               "group_id": str(cfg.get("group_id", ""))[:32]}
                     elif ctype == "bark":
                         device_key = str(cfg.get("device_key", ""))[:80]
                         server = str(cfg.get("server", ""))[:200]
@@ -497,19 +517,19 @@ class Handler(BaseHTTPRequestHandler):
                             return self._send({"ok": False, "error": "bad_server_url"}, status=400)
                         if not device_key:
                             return self._send({"ok": False, "error": "missing device_key"}, status=400)
-                        cfg = {"device_key": device_key, "server": server}
+                        cfg = {"name": ch_name, "device_key": device_key, "server": server}
                     elif ctype == "http":
                         url = str(cfg.get("url", ""))[:300]
                         if url and not url.startswith("http"):
                             return self._send({"ok": False, "error": "bad_webhook_url"}, status=400)
-                        cfg = {"url": url}
+                        cfg = {"name": ch_name, "url": url}
                     else:
                         return self._send({"ok": False, "error": "bad_channel"}, status=400)
                     rec.setdefault("channels", {})[ctype] = cfg
                     store.save_users(users, meta)
                     return self._send({"ok": True})
 
-                if path == "/api/channels/test":
+                if path == "/atlas/channels/test":
                     ctype = str(body.get("type", ""))
                     cfg = (rec.get("channels") or {}).get(ctype) or {}
                     text = f"✅ App Atlas 测试消息：{config.TYPE_LABEL.get(ctype, ctype)} 渠道配置成功"
