@@ -56,6 +56,16 @@ TYPE_LABEL = {"drop": "📉 降价", "raise": "📈 涨价",
 TG_QUICK_REGIONS = ["US", "CN", "TR", "IN", "AR", "PK", "NG", "BR"]
 PERIOD_LABEL = {"ONCE": "买断", "P1W": "周付", "P1M": "月付", "P3M": "季付",
                 "P6M": "半年付", "P1Y": "年付"}
+
+# 同步到 Telegram 的命令菜单(输入 / 时弹出);描述 ≤256 字符
+TG_COMMANDS = [
+    {"command": "s", "description": "搜索应用 / 查看应用信息"},
+    {"command": "n", "description": "各区订阅最低价"},
+    {"command": "b", "description": "本体买断价格"},
+    {"command": "j", "description": "应用简介"},
+    {"command": "g", "description": "版本更新说明"},
+    {"command": "help", "description": "使用说明"},
+]
 TG_HELP = (
     "📱 <b>App Atlas 查价机器人</b>\n\n"
     "<b>搜索应用</b>\n"

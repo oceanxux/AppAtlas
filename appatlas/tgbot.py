@@ -429,6 +429,8 @@ def tg_handle_callback(token, cbq):
 def tg_bot_loop(token, gen):
     """getUpdates 长轮询;token 更换/清除时由 manager 换代退出。"""
     tg_call(token, "deleteWebhook", {"drop_pending_updates": False}, timeout=8)
+    # 同步命令菜单(Telegram 客户端输入 / 时弹出)
+    tg_call(token, "setMyCommands", {"commands": config.TG_COMMANDS}, timeout=8)
     print("🤖 TG 查价机器人已上线：/help 看指令；发名称出搜索（点按钮选择），发 ID/链接出订阅最低价")
     users, _ = store.load_users()
     allow = tg_allowed_chat(users)
