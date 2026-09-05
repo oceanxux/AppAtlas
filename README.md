@@ -1,4 +1,4 @@
-# 🌍 App Atlas — App Store 全球比价工具
+# 🌍 App Atlas — App Store 比价工具
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
