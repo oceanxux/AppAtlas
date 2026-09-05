@@ -5,6 +5,7 @@ import os
 import re
 import secrets
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -15,6 +16,27 @@ from socketserver import ThreadingMixIn
 
 from . import cache, config, fx, monitor, store, tgbot
 from .apple import fetch_iap_data, http_get_json, search_apps
+
+
+# ---------- 数据接口调用统计 ----------
+STATS_LOCK = threading.Lock()
+_stats = None
+
+
+def record_api_call(cost_ms):
+    """记一次数据接口调用(次数 + 耗时),保留近 30 天。"""
+    global _stats
+    d = time.strftime("%Y-%m-%d")
+    with STATS_LOCK:
+        if _stats is None:
+            _stats = store.load_json_file(config.STATS_FILE, {})
+        ent = _stats.setdefault(d, [0, 0.0])
+        ent[0] += 1
+        ent[1] += cost_ms
+        cutoff = time.strftime("%Y-%m-%d", time.localtime(time.time() - 30 * 86400))
+        for k in [k for k in _stats if k < cutoff]:
+            del _stats[k]
+        store.save_json_file(config.STATS_FILE, _stats)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -59,10 +81,11 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        path = urllib.parse.urlparse(self.path).path
+        t0 = time.time() if path in config.API_DATA_PATHS else None
         try:
             url = urllib.parse.urlparse(self.path)
             qs = {k: v[0] for k, v in urllib.parse.parse_qs(url.query).items()}
-            path = url.path
 
             # ---------- HTML 主页 ----------
             if path in ("/", "/index.html"):
@@ -109,6 +132,21 @@ class Handler(BaseHTTPRequestHandler):
                                       status=401)
 
             # ---------- 0.2 登录用户的密钥 / 监控 / 通知 / 渠道 ----------
+            if path == "/atlas/stats":
+                info = store.get_session(self.headers)
+                if not info:
+                    return self._send({"ok": False, "error": "unauthorized"}, status=401)
+                with STATS_LOCK:
+                    snap = dict(_stats if _stats is not None
+                                else store.load_json_file(config.STATS_FILE, {}))
+                days = []
+                for i in range(29, -1, -1):
+                    d = time.strftime("%Y-%m-%d", time.localtime(time.time() - i * 86400))
+                    c, total = snap.get(d, [0, 0.0])
+                    days.append({"date": d, "count": c,
+                                 "avg_ms": round(total / c) if c else 0})
+                return self._send({"ok": True, "days": days})
+
             if path in ("/atlas/keys", "/atlas/watch", "/atlas/notifications", "/atlas/channels"):
                 info = store.get_session(self.headers)
                 if not info:
@@ -237,6 +275,9 @@ class Handler(BaseHTTPRequestHandler):
             self._err(f"upstream HTTP {e.code}: {e.reason}", code=502)
         except Exception as e:
             self._err(str(e), code=500)
+        finally:
+            if t0 is not None:
+                record_api_call((time.time() - t0) * 1000)
 
     # ---------- 登录 / 注册 / 登出 / 用户管理 ----------
     def _read_json_body(self):

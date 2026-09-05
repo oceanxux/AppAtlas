@@ -565,6 +565,10 @@
   .key-table td{padding:9px 10px;border-bottom:1px solid var(--hair)}
   .key-val{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);
     cursor:pointer;background:var(--panel2);padding:3px 8px;border-radius:6px}
+  .cg{stroke:var(--hair2);stroke-dasharray:3,4}
+  .ct{fill:var(--muted);font-size:11px}
+  .cbar{fill:var(--accent);opacity:.8;cursor:pointer;transition:opacity .12s}
+  .cbar:hover{opacity:1}
   .api-docs{background:var(--panel2);border-radius:12px;padding:14px 16px;font-size:12px;
     line-height:1.7;overflow-x:auto;font-family:ui-monospace,Menlo,monospace;color:var(--muted2);
     white-space:pre-wrap;word-break:break-all;margin:0}
@@ -1057,6 +1061,8 @@
       </div>
       <div id="keyTableWrap"></div>
     </div>
+    <div class="section-title" style="margin-top:24px"><span data-i18n="statTitle"></span></div>
+    <div class="panel-card" id="statChartWrap"></div>
     <div class="section-title" style="margin-top:24px"><span data-i18n="apiDocs"></span></div>
     <pre class="api-docs" id="apiDocs"></pre>
   </div>
@@ -1200,6 +1206,7 @@ const I18N = {
     adminAddUser:"添加用户",
     publicApiAccess:"公开API访问权限",
     apiSub:"创建 API 密钥，供脚本或第三方工具调用数据接口",
+    statTitle:"调用统计（近 30 天）", statCalls:"次调用", statAvg:"平均延迟", statEmpty:"暂无调用记录",
     apiNeedAuth:"数据接口已开启保护，请先登录",
     resetPwd:"重置密码", newPwdFor:"为 {u} 设置新密码：", confirmDel:"确定删除用户 {u}？",
     usersLoadFail:"加载用户列表失败", needAdmin:"需要管理员权限", opDone:"操作成功 ✓",
@@ -1296,6 +1303,7 @@ const I18N = {
     adminAddUser:"Add user",
     publicApiAccess:"Public API access",
     apiSub:"Create API keys for scripts and third-party tools",
+    statTitle:"Usage (last 30 days)", statCalls:"calls", statAvg:"avg latency", statEmpty:"No API calls yet",
     apiNeedAuth:"API is protected — please sign in",
     resetPwd:"Reset password", newPwdFor:"New password for {u}:", confirmDel:"Delete user {u}?",
     usersLoadFail:"Failed to load users", needAdmin:"Admin required", opDone:"Done ✓",
@@ -2908,6 +2916,52 @@ function showApi(){
     `curl "${location.origin}/atlas/fx" -H "X-API-Key: <你的密钥>"\n` +
     '#  → {"base":"USD","rates":{"CNY":7.1,...}}';
   reloadKeys();
+  fetch("/atlas/stats", {headers:{"X-Auth-Token": state.token || ""}})
+    .then(x=>x.json()).then(d=>{
+      if (d && d.ok) renderStatChart(d.days || []);
+    }).catch(()=>{});
+}
+/* 调用统计柱状图(近 30 天) */
+function renderStatChart(days){
+  const wrap = $("statChartWrap");
+  if (!days.length || !days.some(d=>d.count)){
+    wrap.innerHTML = `<div class="empty">${t("statEmpty")}</div>`;
+    return;
+  }
+  const max = Math.max(5, ...days.map(d=>d.count));
+  const W=860, H=250, padL=44, padB=30, padT=14;
+  const plotH = H - padT - padB, iw = (W - padL - 12) / 30;
+  const y = v => padT + plotH * (1 - v / max);
+  let grid = "", labels = "", bars = "";
+  for (let g = 0; g <= 4; g++){
+    const v = Math.round(max * g / 4);
+    grid += `<line x1="${padL}" y1="${y(v)}" x2="${W-12}" y2="${y(v)}" class="cg"/>` +
+            `<text x="${padL-8}" y="${y(v)+4}" text-anchor="end" class="ct">${v}</text>`;
+  }
+  days.forEach((d, i)=>{
+    const bx = padL + i * iw + iw * 0.2, bw = iw * 0.6;
+    if (d.count){
+      bars += `<rect x="${bx.toFixed(1)}" y="${y(d.count).toFixed(1)}" width="${bw.toFixed(1)}" height="${(plotH*d.count/max).toFixed(1)}" rx="3" class="cbar" data-i="${i}"/>`;
+    }
+    if (i % 5 === 0 || i === 29){
+      const dd = new Date(d.date + "T00:00:00");
+      const lb = LANG === "en" ? `${dd.getMonth()+1}/${dd.getDate()}` : `${dd.getMonth()+1}月${dd.getDate()}日`;
+      labels += `<text x="${(bx+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" class="ct">${lb}</text>`;
+    }
+  });
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${grid}${labels}${bars}</svg>`;
+  const tt = $("chartTooltip");
+  wrap.querySelectorAll(".cbar").forEach(r=>{
+    r.addEventListener("mousemove", e=>{
+      const d = days[+r.dataset.i];
+      tt.innerHTML = `<b>${d.date.slice(5).replace("-", "月")}日</b><br>${d.count} ${t("statCalls")}` +
+        (d.count ? `<br>${t("statAvg")}: ${d.avg_ms}ms` : "");
+      tt.style.display = "block";
+      tt.style.left = (e.pageX + 14) + "px";
+      tt.style.top = (e.pageY - 12) + "px";
+    });
+    r.addEventListener("mouseleave", ()=>{ tt.style.display = "none"; });
+  });
 }
 async function reloadKeys(){
   const r = await fetch("/atlas/keys", {headers:{"X-Auth-Token": state.token || ""}})

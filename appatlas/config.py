@@ -16,6 +16,7 @@ USERS_FILE = DATA_DIR / "users.json"
 CACHE_FILE = DATA_DIR / "cache.json"
 MONITOR_FILE = DATA_DIR / "monitor.json"      # app_id → 最近一次报价快照
 NOTIF_FILE = DATA_DIR / "notifications.json"  # username → [事件]
+STATS_FILE = DATA_DIR / "api_stats.json"      # 数据接口调用统计 {日期: [次数, 总耗时ms]}
 
 # 登录会话有效期(内存态,重启后需重新登录)
 SESSION_TTL = 7 * 86400
