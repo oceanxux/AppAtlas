@@ -18,11 +18,3 @@ __pycache__/
 nohup.out
 *.log
 .venv/
-
-# 本地双击启动器（不上传，仅本地使用）
-启动 (macOS).command
-启动 (Windows).bat
-
-# 本地测试脚本不入库
-tests/
-.pytest_cache/
