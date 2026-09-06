@@ -17,6 +17,7 @@
 - ⚖️ **多 App 横评**：监控列表多选，跨 App 跨国大表（ChatGPT vs YouTube vs Notion）
 - 🔔 **价格监控**：定时比对报价，降价/涨价/新增/移除套餐自动推送
 - 🤖 **Telegram 查价机器人**：发名称出搜索、发 ID/链接出各区最低价，支持 `/s /b /n /j /g` 指令与内联按钮点选（见下方专节）
+- 🍎 **Apple 官方服务价格**：iCloud+（37 区 × 5 档）与 Apple One（39 区 × 3 档），数据来自 Apple 官网每日更新，支持价格监控与推送
 - 🔑 **账号系统**：注册 / 登录 / 管理员，支持 API 密钥与「公开API访问权限」开关
 - 🌙 深色模式 + 中英双语 UI + CSV 导出 + 实时汇率
 
@@ -168,6 +169,8 @@ Base URL：`http://127.0.0.1:8765`。登录后调用受保护接口带请求头 
 | GET | `/atlas/iap` | `id` App ID；`country` 区码 | 内购/订阅价格（未上架返回 `{"ok":false,"reason":"not_listed"}`）|
 | GET | `/atlas/top` | 无 | 首页「热门订阅 App」清单 |
 | GET | `/atlas/fx` | 无 | 实时汇率（USD 基准）|
+| GET | `/atlas/svc?name=icloud\|appleone` | 无 | Apple 官方服务价格（iCloud+ / Apple One 各区各档）|
+| GET | `/atlas/stats` | -（需登录） | API 调用统计（近 30 天每日次数与平均延迟；仅统计脚本/外部调用，网页浏览不计）|
 | GET | `/health` | 无 | 健康检查 `{"ok":true,"ts":...}` |
 
 `/atlas/iap` 返回结构（节选）：
@@ -274,7 +277,6 @@ curl "$BASE/atlas/iap?id=6448311069&country=us" -H "X-API-Key: Atlas_xxx"
 | `AppPriceTracker.py` | 一键启动入口（薄封装，调用 `appatlas.server.main`）|
 | `appatlas/` | 后端包（9 个模块，纯标准库）|
 | `AppPriceTracker.html` | 前端（单文件 HTML+JS，深色模式自适应）|
-| `requirements.txt` | 运行时零依赖；仅列出开发用工具 |
 | `Dockerfile` / `docker-compose.yml` | Docker 部署（含日志轮转上限）|
 | `.github/workflows/docker.yml` | GitHub Actions 自动构建镜像（amd64 + arm64）|
 
