@@ -26,5 +26,30 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from appatlas.server import main
 
+
+def reset_password(username, new_password):
+    """忘记密码时从命令行重置(仅本机/容器内可用,不影响其他数据)。"""
+    import secrets
+    from appatlas import store
+    users, meta = store.load_users()
+    if username not in users:
+        print(f"❌ 用户 {username} 不存在")
+        sys.exit(1)
+    if len(new_password) < 6:
+        print("❌ 新密码至少 6 位")
+        sys.exit(1)
+    users[username]["salt"] = secrets.token_hex(8)
+    users[username]["hash"] = store._hash_password(users[username]["salt"], new_password)
+    users[username]["must_change"] = 0
+    store.save_users(users, meta)
+    print(f"✅ 已重置 {username} 的密码，请用新密码登录")
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) >= 2 and sys.argv[1] == "resetpw":
+        if len(sys.argv) < 4:
+            print("用法: python3 AppPriceTracker.py resetpw <用户名> <新密码>(至少 6 位)")
+            sys.exit(1)
+        reset_password(sys.argv[2], sys.argv[3])
+    else:
+        main()

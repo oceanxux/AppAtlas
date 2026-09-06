@@ -17,6 +17,7 @@ CACHE_FILE = DATA_DIR / "cache.json"
 MONITOR_FILE = DATA_DIR / "monitor.json"      # app_id → 最近一次报价快照
 NOTIF_FILE = DATA_DIR / "notifications.json"  # username → [事件]
 STATS_FILE = DATA_DIR / "api_stats.json"      # 数据接口调用统计 {日期: [次数, 总耗时ms]}
+SVC_FILE = DATA_DIR / "apple_services.json"   # Apple 官方服务价格(iCloud+/Apple One)缓存
 
 # 登录会话有效期(内存态,重启后需重新登录)
 SESSION_TTL = 7 * 86400
@@ -37,12 +38,11 @@ TOP_SUBSCRIPTION_APPS = [
     "6477489729",  # Google Gemini
     "6670324846",  # Grok AI
     "324684580",   # Spotify
-    "363590051",   # Netflix
     "544007664",   # YouTube
-    "686449807",   # Telegram
-    "414478124",   # WeChat
-    "932747118",   # Shadowrocket
+    "icloud",      # iCloud+(Apple 官方服务,第 7 位)
+    "appleone",    # Apple One(第 8 位)
 ]
+
 
 # 价格监控默认覆盖区(用户未勾选地区时)
 DEFAULT_MONITOR_REGIONS = ["US", "CN", "HK", "TW", "JP", "KR", "SG", "MY", "TH",
@@ -91,6 +91,7 @@ TG_HELP = (
 )
 
 # 需要鉴权的数据接口(受"接口需密钥"开关控制)
-API_DATA_PATHS = ("/atlas/search", "/atlas/lookup", "/atlas/iap", "/atlas/top", "/atlas/fx")
+API_DATA_PATHS = ("/atlas/search", "/atlas/lookup", "/atlas/iap", "/atlas/top",
+                  "/atlas/fx", "/atlas/svc")
 # 始终开放:页面本体、健康检查、登录态查询
 API_OPEN_PATHS = ("/", "/index.html", "/health", "/atlas/me")

@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 
-from . import cache, config, fx, monitor, store, tgbot
+from . import applesvc, cache, config, fx, monitor, store, tgbot
 from .apple import fetch_iap_data, http_get_json, search_apps
 
 
@@ -200,6 +200,8 @@ class Handler(BaseHTTPRequestHandler):
                     lang = ""
                 if not aid:
                     return self._err("missing id", 400)
+                if aid in applesvc.SVC_APPS or aid.startswith("svc:"):
+                    return self._send(applesvc.lookup_view(aid.replace("svc:", "")))
                 key = f"lookup:{aid}:{cc}:{lang}"
 
                 def _fetch_lookup():
@@ -222,6 +224,8 @@ class Handler(BaseHTTPRequestHandler):
                 cc = qs.get("country", "us").lower()
                 if not aid:
                     return self._err("missing id", 400)
+                if aid in applesvc.SVC_APPS or aid.startswith("svc:"):
+                    return self._send(applesvc.iap_view(aid.replace("svc:", ""), cc))
                 data = fetch_iap_data(aid, cc)
                 if data is not None:
                     return self._send(data)
@@ -230,13 +234,24 @@ class Handler(BaseHTTPRequestHandler):
             # ---------- 3.5 热门订阅 App（人工策划清单,元数据实时拉取,缓存 24h） ----------
             # Apple 官方没有"订阅榜",主流比价站均为人工策划;
             # 清单对齐 ChatGPT/Claude/Gemini/流媒体/社交等有订阅内购的头部 App
+            if path == "/atlas/svc":
+                name = qs.get("name", "").strip().lower()
+                data = applesvc.get_service(name, force=qs.get("force") == "1")
+                if data:
+                    return self._send({"ok": True, "service": name, **data})
+                return self._err("unknown service or upstream unavailable", 404)
+
             if path == "/atlas/top":
-                ck = "top:subs10:v2"
+                ck = "top:subs10:v10"
                 cached = cache.cache_get(ck)
                 if cached is not None:
                     return self._send(cached)
 
                 def _fetch_meta(aid):
+                    if aid in applesvc.SVC_APPS or aid.startswith("svc:"):
+                        meta = applesvc.SVC_APPS.get(aid.replace("svc:", "")) or {}
+                        return {"id": aid.replace("svc:", ""), "name": meta.get("name", aid),
+                                "artist": "Apple 官方服务", "icon": meta.get("icon", "")}
                     try:
                         d = http_get_json(
                             f"https://itunes.apple.com/lookup?id={aid}"
@@ -276,7 +291,8 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             self._err(str(e), code=500)
         finally:
-            if t0 is not None:
+            # 只统计脚本/外部调用;网页自身的查询(X-Web-App)不计入
+            if t0 is not None and self.headers.get("X-Web-App") != "1":
                 record_api_call((time.time() - t0) * 1000)
 
     # ---------- 登录 / 注册 / 登出 / 用户管理 ----------
@@ -515,7 +531,8 @@ class Handler(BaseHTTPRequestHandler):
 
                 if path == "/atlas/watch/save":
                     aid = str(body.get("app_id", ""))
-                    if not aid.isdigit():
+                    if not (aid.isdigit() or aid in applesvc.SVC_APPS
+                            or aid.startswith("svc:")):
                         return self._send({"ok": False, "error": "missing app_id"},
                                           status=400)
                     w = {"app_id": aid,

@@ -2,7 +2,7 @@
 """价格监控:定时拉取监控中的 App 报价,与上次快照对比生成事件并推送。"""
 import time
 
-from . import config, notify, store
+from . import applesvc, config, notify, store
 from .apple import build_offers_map
 
 
@@ -66,7 +66,10 @@ def run_monitor_pass():
         regions = set()
         for _, w in watchers:
             regions.update(w.get("regions") or config.DEFAULT_MONITOR_REGIONS)
-        current = build_offers_map(aid, sorted(regions))
+        if str(aid) in applesvc.SVC_APPS or str(aid).startswith("svc:"):
+            current = applesvc.build_offers_map(str(aid).replace("svc:", ""), sorted(regions))
+        else:
+            current = build_offers_map(aid, sorted(regions))
         prev = (monitor.get(aid) or {}).get("offers")
         app_name = watchers[0][1].get("name") or aid
         for uname, w in watchers:
